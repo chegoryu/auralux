@@ -17,6 +17,7 @@ struct TPlayerMove {
     };
 
     bool DisqualifyMe_ = false;
+    std::string DisqualifyReason_;
     std::vector<TShipMove> ShipMoves_;
 };
 

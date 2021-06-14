@@ -30,6 +30,14 @@ void TGameLogger::LogInvalidMove(int playerId, const TPlayerMove::TShipMove& shi
     LogError(ss.str());
 }
 
+void TGameLogger::LogDisqualifyPlayer(int playerId, const std::string& reason) {
+    std::stringstream ss;
+    ss
+        << "Disqualify player '" << std::to_string(playerId) << "': "
+        << reason;
+    LogError(ss.str());
+}
+
 const std::vector<TGameState> TGameLogger::GetGameStates() const {
     return GameStates_;
 }

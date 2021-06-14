@@ -22,6 +22,7 @@ public:
         int PlanetProductionMultiply_ = 1;
 
         int MaxShipGroupsInSpace_ = 1000;
+        int MaxPlayerShipMovesPerStep_ = 1000;
 
         TGameMap GameMap_;
     };
@@ -48,7 +49,7 @@ private:
     void PrePlayerMove(int playerId);
     void PlayerMove(int playerId);
 
-    void DisqualifyPlayer(int playerId);
+    void DisqualifyPlayer(int playerId, const std::string& reason);
     void MarkPlayerAsDead(int playerId);
 
     bool IsPlayerDead(int playerId) const;

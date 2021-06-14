@@ -20,6 +20,7 @@ public:
     void LogError(const std::string& error);
 
     void LogInvalidMove(int playerId, const TPlayerMove::TShipMove& shipMove, const std::string& reason);
+    void LogDisqualifyPlayer(int playerId, const std::string& reason);
 
     const std::vector<TGameState> GetGameStates() const;
     const TGameState& GetFinalGameState() const;

@@ -34,6 +34,10 @@
     PLAYER MOVE END
 */
 
+TTextPlayer::TTextPlayer(int maxPlayerMovesPerReadMove)
+    : MaxPlayerMovesPerReadMove_(maxPlayerMovesPerReadMove)
+{}
+
 void TTextPlayer::SendGameInfo(const TGameInfo& gameInfo) {
     WriteGameInfo(gameInfo);
 }
@@ -41,6 +45,13 @@ void TTextPlayer::SendGameInfo(const TGameInfo& gameInfo) {
 TPlayerMove TTextPlayer::GetMove(const TGameState& gameState, const TLastShipMoves& lastShipMoves) {
     WriteGameState(gameState, lastShipMoves);
     return ReadPlayerMove();
+}
+
+TPlayerMove TTextPlayer::DisqualifyMe(const std::string& reason) const {
+    TPlayerMove playerMove;
+    playerMove.DisqualifyMe_ = true;
+    playerMove.DisqualifyReason_ = reason;
+    return playerMove;
 }
 
 void TTextPlayer::WriteGameInfo(const TGameInfo& gameInfo) {
@@ -90,7 +101,6 @@ void TTextPlayer::WriteGameState(const TGameState& gameState, const TLastShipMov
     }
 }
 
-#include <iostream>
 TPlayerMove TTextPlayer::ReadPlayerMove() {
     TPlayerMove playerMove;
     playerMove.DisqualifyMe_ = false;
@@ -99,9 +109,12 @@ TPlayerMove TTextPlayer::ReadPlayerMove() {
     {
         std::stringstream ss(ReadLine());
         if (!(ss >> moveCount)) {
-            playerMove.DisqualifyMe_ = true;
-            return playerMove;
+            return DisqualifyMe("Failed to read move count");
         }
+    }
+
+    if (moveCount < 0 || moveCount > MaxPlayerMovesPerReadMove_) {
+        return DisqualifyMe("Invalid move count (negative or too big): " + std::to_string(moveCount));
     }
 
     for (int i = 0; i < moveCount; ++i) {
@@ -109,8 +122,7 @@ TPlayerMove TTextPlayer::ReadPlayerMove() {
 
         TPlayerMove::TShipMove shipMove;
         if (!(ss >> shipMove.FromPlanetId_) || !(ss >> shipMove.ToPlanetId_) || !(ss >> shipMove.Count_)) {
-            playerMove.DisqualifyMe_ = true;
-            return playerMove;
+            return DisqualifyMe("Failed to read ship move");
         }
 
         playerMove.ShipMoves_.push_back(shipMove);

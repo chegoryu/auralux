@@ -72,7 +72,7 @@ bool TGame::Init() {
 
             player.PlayerEngine_->SendGameInfo(gameInfo);
         } catch (...) {
-            DisqualifyPlayer(player.PlayerId_);
+            DisqualifyPlayer(player.PlayerId_, "failed send game info to player");
         }
     }
 
@@ -85,7 +85,7 @@ bool TGame::Step() {
         try {
             PlayerMove(static_cast<int>(i));
         } catch (...) {
-            DisqualifyPlayer(i - 1);
+            DisqualifyPlayer(i - 1, "failed to do player move (exception)");
         }
 
         GameLogger_.LogGameState(GameState_);
@@ -180,12 +180,16 @@ void TGame::PlayerMove(int playerId) {
 
     TPlayerMove playerMove = playerInfo.PlayerEngine_->GetMove(GameState_, lastShipMoves);
     if (playerMove.DisqualifyMe_) {
-        DisqualifyPlayer(playerId);
+        DisqualifyPlayer(playerId, playerMove.DisqualifyReason_);
+        return;
+    }
+
+    if (playerMove.ShipMoves_.size() > Config_.MaxPlayerShipMovesPerStep_) {
+        DisqualifyPlayer(playerId, "too many moves " + std::to_string(playerMove.ShipMoves_.size()));
         return;
     }
 
     int shipGroupsInSpace = GetShipGroupsInSpace(playerId);
-
     std::set<int> alreadyUpgraded_;
     for (const auto& shipMove : playerMove.ShipMoves_) {
         if (!IsValidPlanetId(shipMove.FromPlanetId_) || !IsValidPlanetId(shipMove.ToPlanetId_) || shipMove.Count_ <= 0) {
@@ -281,7 +285,9 @@ void TGame::PlayerMove(int playerId) {
     }
 }
 
-void TGame::DisqualifyPlayer(int playerId) {
+void TGame::DisqualifyPlayer(int playerId, const std::string& reason) {
+    GameLogger_.LogDisqualifyPlayer(playerId, reason);
+
     Players_.at(playerId).IsDisqualified_ = true;
     GameState_.AlivePlayers_.erase(playerId);
     GameState_.DisqualifiedPlayers_.push_back(playerId);

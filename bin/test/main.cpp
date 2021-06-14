@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
     TGame game(config);
 
     game.AddPlayer(std::make_unique<TAFKPlayer>());
-    game.AddPlayer(std::make_unique<TStdinStdoutPlayer>());
+    game.AddPlayer(std::make_unique<TStdinStdoutPlayer>(config.MaxPlayerShipMovesPerStep_));
     game.Process();
 
     auto errors = game.GetGameLogger().GetErrors();

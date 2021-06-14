@@ -11,7 +11,7 @@
 
 class TTextPlayer : public IPlayer {
 public:
-    using IPlayer::IPlayer;
+    TTextPlayer(int maxPlayerMovesPerReadMove);
 
     void SendGameInfo(const TGameInfo& gameInfo) override final;
     TPlayerMove GetMove(const TGameState& gameInfo, const TLastShipMoves& lastShipMoves) override final;
@@ -21,9 +21,14 @@ protected:
     virtual void WriteLine(const std::string& line) = 0;
 
 private:
+    TPlayerMove DisqualifyMe(const std::string& reason) const;
+
     void WriteGameInfo(const TGameInfo& gameInfo);
     void WriteGameState(const TGameState& gameState, const TLastShipMoves& lastShipMoves);
     TPlayerMove ReadPlayerMove();
+
+private:
+    int MaxPlayerMovesPerReadMove_;
 };
 
 #endif // AURALUX_TEXT_PLAYER_H
