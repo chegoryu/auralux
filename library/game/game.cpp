@@ -71,8 +71,8 @@ bool TGame::Init() {
             gameInfo.GameMap_ = Config_.GameMap_;
 
             player.PlayerEngine_->SendGameInfo(gameInfo);
-        } catch (...) {
-            DisqualifyPlayer(player.PlayerId_, "failed send game info to player");
+        } catch (const std::exception& e) {
+            DisqualifyPlayer(player.PlayerId_, "failed send game info to player: " + std::string(e.what()));
         }
     }
 
@@ -84,8 +84,8 @@ bool TGame::Step() {
         PrePlayerMove(static_cast<int>(i));
         try {
             PlayerMove(static_cast<int>(i));
-        } catch (...) {
-            DisqualifyPlayer(i - 1, "failed to do player move (exception)");
+        } catch (const std::exception& e) {
+            DisqualifyPlayer(i, "failed to do player move: " + std::string(e.what()));
         }
 
         GameLogger_.LogGameState(GameState_);
@@ -288,13 +288,13 @@ void TGame::PlayerMove(int playerId) {
 void TGame::DisqualifyPlayer(int playerId, const std::string& reason) {
     GameLogger_.LogDisqualifyPlayer(playerId, reason);
 
-    Players_.at(playerId).IsDisqualified_ = true;
+    Players_.at(playerId - 1).IsDisqualified_ = true;
     GameState_.AlivePlayers_.erase(playerId);
     GameState_.DisqualifiedPlayers_.push_back(playerId);
 }
 
 void TGame::MarkPlayerAsDead(int playerId) {
-    Players_.at(playerId).IsDead_ = true;
+    Players_.at(playerId - 1).IsDead_ = true;
     GameState_.AlivePlayers_.erase(playerId);
     GameState_.DeadPlayers_.push_back(playerId);
 }

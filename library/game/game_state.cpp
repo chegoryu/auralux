@@ -10,7 +10,7 @@ template<typename T>
 void PrintContainer(std::ostream& stream, const T& container) {
     stream << container.size() << std::endl;
     bool isFirst = true;
-    for (const auto id: container) {
+    for (const auto id : container) {
         stream << (isFirst ? "" : " ") << id;
         isFirst = false;
     }
