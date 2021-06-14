@@ -6,18 +6,13 @@
 
 #include <sstream>
 
-/*
-    INIT INFO START
-    PlayerId PlayerCount PlanetCount
-    <Matrix PlanetCount x PlanetCount>
-    INIT INFO END
-*/
+
 
 /*
     PER MOVE INFO START
 
     <PlanetCount lines>
-    Captured PlayerId ShipCount Level Armor
+    PlayerId ShipCount Level Armor
 
     <number of moves>
     PlayerId FromPlanetId ToPlanetId Count
