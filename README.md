@@ -1,2 +1,2 @@
-# auralux
+# Auralux
 Auralux tournament for losh
