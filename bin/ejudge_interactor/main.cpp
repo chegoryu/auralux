@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
     }
     int winner = *finalGameState.AlivePlayers_.begin();
 
-    if (winner -1 != ejudgePlayerId) {
+    if (winner - 1 != ejudgePlayerId) {
         quitf(_wa, "Winner is %d, but ejudge player id is %d", winner, ejudgePlayerId + 1);
     }
 
