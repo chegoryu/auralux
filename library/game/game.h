@@ -40,14 +40,18 @@ public:
     void Process();
 
 private:
-    void Init();
-    void Step();
+    bool Init();
+    bool Step();
     void PrePlayerMove(int playerId);
     void PlayerMove(int playerId);
+
+    void DisqualifyPlayer(int playerId);
+    void MarkPlayerAsDead(int playerId);
 
     bool IsPlayerDead(int playerId) const;
     int GetShipGroupsInSpace(int playerId) const;
     bool IsValidPlanetId(int planetId) const ;
+
 
 private:
     const TConfig Config_;

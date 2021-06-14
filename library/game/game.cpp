@@ -26,7 +26,10 @@ TGame::TGame(const TConfig& config)
         planet.ShipCount_ = Config_.StartShipsCount_;
         planet.Level_ = 1;
         planet.Armor_ = Config_.PerLevelPlanetArmor_[planet.Level_];
+
+        GameState_.AlivePlayers_.insert(i + 1);
     }
+
 
     GameState_.IsFirstStep_ = true;
 }
@@ -44,13 +47,17 @@ void TGame::AddPlayer(std::unique_ptr<IPlayer> player) {
 void TGame::Process() {
     assert(Players_.size() == Config_.GameMap_.StartPlanets_.size());
 
-    Init();
+    if (!Init()) {
+        return;
+    }
     for (int stepId = 0; stepId < Config_.MaxSteps_; ++stepId) {
-        Step();
+        if (!Step()) {
+            break;
+        }
     }
 }
 
-void TGame::Init() {
+bool TGame::Init() {
     for (auto& player : Players_) {
         try {
             TGameInfo gameInfo;
@@ -60,12 +67,14 @@ void TGame::Init() {
 
             player.PlayerEngine_->SendGameInfo(gameInfo);
         } catch (...) {
-            player.IsDisqualified_ = true;
+            DisqualifyPlayer(player.PlayerId_);
         }
     }
+
+    return GameState_.AlivePlayers_.size() > 1;
 }
 
-void TGame::Step() {
+bool TGame::Step() {
     for (size_t i = 1; i <= Players_.size(); ++i) {
         PrePlayerMove(static_cast<int>(i));
         try {
@@ -73,11 +82,17 @@ void TGame::Step() {
         } catch (...) {
             Players_.at(i - 1).IsDisqualified_ = true;
         }
+
+        if (GameState_.AlivePlayers_.size() <= 1) {
+            return false;
+        }
     }
 
     if (GameState_.IsFirstStep_) {
         GameState_.IsFirstStep_ = false;
     }
+
+    return true;
 }
 
 void TGame::PrePlayerMove(int playerId) {
@@ -236,6 +251,18 @@ void TGame::PlayerMove(int playerId) {
             }
         }
     }
+}
+
+void TGame::DisqualifyPlayer(int playerId) {
+    Players_.at(playerId).IsDisqualified_ = true;
+    GameState_.AlivePlayers_.erase(playerId);
+    GameState_.DisqualifiedPlayers_.push_back(playerId);
+}
+
+void TGame::MarkPlayerAsDead(int playerId) {
+    Players_.at(playerId).IsDead_ = true;
+    GameState_.AlivePlayers_.erase(playerId);
+    GameState_.DeadPlayers_.push_back(playerId);
 }
 
 bool TGame::IsPlayerDead(int playerId) const {

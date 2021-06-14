@@ -7,6 +7,7 @@
 
 #include "game_map.h"
 
+#include <set>
 #include <vector>
 
 struct TGameInfo {
@@ -33,6 +34,9 @@ struct TGameState {
 
     std::vector<TPlanetInfo> PlanetInfos_;
     std::vector<TShipGroup> ShipGropus_;
+    std::set<int> AlivePlayers_;
+    std::vector<int> DisqualifiedPlayers_;
+    std::vector<int> DeadPlayers_;
     bool IsFirstStep_ = true;
 };
 
