@@ -15,6 +15,7 @@ include_directories(.)
 SET(LIBRARY_GAME library/game/game.cpp library/game/game.h library/game/player.cpp library/game/player.h library/game/text_player.h library/game/text_player.cpp library/game/default_players.h library/game/default_players.cpp library/game/game_state.cpp library/game/game_state.h library/game/game_map.h library/game/game_map.cpp)
 SET(LIBRARY_TESTLIB library/testlib/testlib.h )
 
+configure_file(${CMAKE_SOURCE_DIR}/library/maps/small_map.txt ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(test bin/test/main.cpp ${LIBRARY_GAME})
 add_executable(ejudge_interactor bin/ejudge_interactor/main.cpp ${LIBRARY_GAME} ${LIBRARY_TESTLIB})

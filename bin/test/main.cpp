@@ -1,19 +1,19 @@
 #include "library/game/game.h"
-
+#include "library/game/game_map.h"
 #include "library/game/default_players.h"
+
+#include <fstream>
 
 int main(int argc, char *argv[]) {
     TGame::TConfig config;
-
-    config.GameMap_ = {
-        .StartPlanets_ = {1, 4},
-        .Dists_ = {
-            {0, 1, 2, 3},
-            {1, 0, 2, 3},
-            {2, 2, 0, 3},
-            {3, 3, 3, 0},
-        },
-    };
+    {
+        std::ifstream stream("small_map.txt");
+        config.GameMap_ = LoadPlanarGraph([&stream]() {
+            int x;
+            stream >> x;
+            return x;
+        });
+    }
 
     config.PlanetProductionMultiply_ = 100;
 

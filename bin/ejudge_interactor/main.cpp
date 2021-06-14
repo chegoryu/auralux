@@ -20,6 +20,28 @@ public:
     }
 };
 
+std::vector<std::unique_ptr<IPlayer>> ReadPlayers(int playerCount) {
+    std::vector<std::unique_ptr<IPlayer>> players;
+
+    bool hasEjudgePlayer = false;
+    for (int i = 0; i < playerCount; ++i) {
+        std::string playerType = inf.readToken();
+
+        if (playerType == "afk") {
+            players.push_back(std::make_unique<TAFKPlayer>());
+        } else if (playerType == "ejudge") {
+            assert(!hasEjudgePlayer);
+            hasEjudgePlayer = true;
+            players.push_back(std::make_unique<TEjudgePlayer>());
+        } else {
+            assert(false);
+        }
+    }
+    assert(hasEjudgePlayer);
+
+    return players;
+}
+
 int main(int argc, char *argv[]) {
     registerInteraction(argc, argv);
 
@@ -29,9 +51,9 @@ int main(int argc, char *argv[]) {
     });
     TGame game(config);
 
-    game.AddPlayer(std::make_unique<TEjudgePlayer>());
-    for (size_t i = 0; i < config.GameMap_.StartPlanets_.size() - 1; ++i) {
-        game.AddPlayer(std::make_unique<TAFKPlayer>());
+    auto players = ReadPlayers(static_cast<int>(config.GameMap_.StartPlanets_.size()));
+    for (auto& player : players) {
+        game.AddPlayer((std::move(player)));
     }
 
     game.Process();
