@@ -5,7 +5,10 @@
 #include "library/testlib/testlib.h"
 
 #include "library/game/game.h"
+
+#include "library/game/default_players.h"
 #include "library/game/text_player.h"
+
 
 class TEjudgePlayer : public TTextPlayer {
 public:
@@ -30,6 +33,7 @@ int main(int argc, char *argv[]) {
     TGame game(config);
 
     game.AddPlayer(std::make_unique<TEjudgePlayer>());
+    game.AddPlayer(std::make_unique<TAFKPlayer>());
     game.Process();
 
     return 0;
