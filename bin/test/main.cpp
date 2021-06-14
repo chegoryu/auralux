@@ -34,7 +34,7 @@ TGame GetBigGame() {
 
     TGame game(config);
 
-    game.AddPlayer(std::make_unique<TUpgradeAndRepairMainPlayer>());
+    game.AddPlayer(std::make_unique<TAggressiveExpansionPlayer>());
     game.AddPlayer(std::make_unique<TDisqualifyPlayer>());
     game.AddPlayer(std::make_unique<TUpgradeAndRepairMainPlayer>());
     game.AddPlayer(std::make_unique<TAFKPlayer>());
@@ -43,6 +43,8 @@ TGame GetBigGame() {
 }
 
 int main(int argc, char *argv[]) {
+    auto startTime = clock();
+
     TGame game = GetBigGame();
     game.Process();
 
@@ -52,6 +54,8 @@ int main(int argc, char *argv[]) {
     }
 
     PrintGameState(std::cout, game.GetGameLogger().GetFinalGameState());
+
+    std::cerr << "Total time: " << (clock() - startTime) / (double)CLOCKS_PER_SEC << std::endl;
 
     return 0;
 }

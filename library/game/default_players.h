@@ -38,6 +38,24 @@ private:
     int PlayerId_;
 };
 
+class TAggressiveExpansionPlayer : public IPlayer {
+public:
+    using IPlayer::IPlayer;
+
+    void SendGameInfo(const TGameInfo& gameInfo) override;
+    TPlayerMove GetMove(const TGameState& gameState, const TLastShipMoves& lastShipMoves) override;
+
+private:
+    int ChooseTargetPlanet(const TGameState& gameState);
+
+private:
+    static constexpr int MAX_PLANET_LEVEL = 3;
+    static constexpr int MIN_SHIPS_TO_MOVE = 100;
+
+    std::vector<int> PlanetOrder_;
+    int PlayerId_;
+};
+
 class TStdinStdoutPlayer : public TTextPlayer {
 public:
     using TTextPlayer::TTextPlayer;

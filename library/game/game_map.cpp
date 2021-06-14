@@ -33,6 +33,7 @@ TGameMap LoadPlanarGraph(std::function<int()> readInt) {
             long long int sqDist = dx * dx + dy * dy;
             int dist = std::round(sqrtl(sqDist));
             assert(dist > 0);
+            assert(dist <= 100);
             gameMap.Dists_[i][j] = gameMap.Dists_[j][i] = dist;
         }
     }
