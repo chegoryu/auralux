@@ -5,12 +5,9 @@
 #ifndef AURALUX_GAME_STATE_H
 #define AURALUX_GAME_STATE_H
 
-#include <vector>
+#include "game_map.h"
 
-struct TGameMap {
-    std::vector<int> StartPlanets_;
-    std::vector<std::vector<int>> Dists_;
-};
+#include <vector>
 
 struct TGameInfo {
     int PlayerId_;

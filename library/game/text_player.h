@@ -13,8 +13,8 @@ class TTextPlayer : public IPlayer {
 public:
     using IPlayer::IPlayer;
 
-    void SendGameInfo(const TGameInfo& gameInfo) override;
-    TPlayerMove GetMove(const TGameState& gameInfo, const TLastShipMoves& lastShipMoves) override;
+    void SendGameInfo(const TGameInfo& gameInfo) override final;
+    TPlayerMove GetMove(const TGameState& gameInfo, const TLastShipMoves& lastShipMoves) override final;
 
 protected:
     virtual std::string ReadLine() = 0;

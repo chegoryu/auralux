@@ -2,13 +2,11 @@
 // Created by Egor Chunaev on 14.06.2021.
 //
 
-#include "library/testlib/testlib.h"
-
 #include "library/game/game.h"
-
+#include "library/game/game_map.h"
 #include "library/game/default_players.h"
-#include "library/game/text_player.h"
 
+#include "library/ejudge/ejudge_player.h"
 
 class TEjudgePlayer : public TTextPlayer {
 public:
@@ -17,7 +15,7 @@ public:
     std::string ReadLine() override {
         return ouf.readLine();
     }
-    virtual void WriteLine(const std::string& line) override {
+    void WriteLine(const std::string& line) override {
         std::cout << line << std::endl;
     }
 };
@@ -26,11 +24,16 @@ int main(int argc, char *argv[]) {
     registerInteraction(argc, argv);
 
     TGame::TConfig config;
-    config.MaxSteps_ = 10;
+    config.GameMap_ = LoadPlanarGraph([]() {
+        return inf.readInt();
+    });
     TGame game(config);
 
     game.AddPlayer(std::make_unique<TEjudgePlayer>());
-    game.AddPlayer(std::make_unique<TAFKPlayer>());
+    for (size_t i = 0; i < config.GameMap_.StartPlanets_.size() - 1; ++i) {
+        game.AddPlayer(std::make_unique<TAFKPlayer>());
+    }
+
     game.Process();
 
     return 0;

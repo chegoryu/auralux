@@ -93,6 +93,7 @@ void TTextPlayer::WriteGameState(const TGameState& gameState, const TLastShipMov
 #include <iostream>
 TPlayerMove TTextPlayer::ReadPlayerMove() {
     TPlayerMove playerMove;
+    playerMove.DisqualifyMe_ = false;
 
     int moveCount = 0;
     {

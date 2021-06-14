@@ -140,7 +140,7 @@ void TGame::PrePlayerMove(int playerId) {
 void TGame::PlayerMove(int playerId) {
     auto& playerInfo = Players_[playerId - 1];
     if (playerInfo.IsDisqualified_ || playerInfo.IsDead_) {
-        return;;
+        return;
     }
 
     if (IsPlayerDead(playerId)) {
@@ -212,7 +212,7 @@ void TGame::PlayerMove(int playerId) {
             }
         } else {
             if (shipGroupsInSpace >= Config_.MaxShipGroupsInSpace_) {
-                continue;;
+                continue;
             }
             ++shipGroupsInSpace;
 

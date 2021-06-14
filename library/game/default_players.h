@@ -25,4 +25,4 @@ protected:
     void WriteLine(const std::string& line) override;
 };
 
-#endif //AURALUX_DEFAULT_PLAYERS_H
+#endif // AURALUX_DEFAULT_PLAYERS_H
