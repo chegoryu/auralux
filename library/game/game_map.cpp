@@ -4,6 +4,8 @@
 
 #include "game_map.h"
 
+#include <cmath>
+
 TGameMap LoadPlanarGraph(std::function<int()> readInt) {
     TGameMap gameMap;
 
@@ -29,7 +31,8 @@ TGameMap LoadPlanarGraph(std::function<int()> readInt) {
             long long int dx = coords[i].first - coords[j].first;
             long long int dy = coords[i].second - coords[j].second;
             long long int sqDist = dx * dx + dy * dy;
-            int dist = static_cast<int>(sqrtl(sqDist));
+            int dist = std::round(sqrtl(sqDist));
+            assert(dist > 0);
             gameMap.Dists_[i][j] = gameMap.Dists_[j][i] = dist;
         }
     }
