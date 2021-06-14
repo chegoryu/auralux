@@ -8,7 +8,8 @@
 #include <vector>
 
 struct TGameMap {
-
+    std::vector<int> StartPlanets_;
+    std::vector<std::vector<int>> Dists_;
 };
 
 struct TGameInfo {
@@ -18,7 +19,7 @@ struct TGameInfo {
 };
 
 struct TGameState {
-    struct TShipMove {
+    struct TShipGroup {
         int PlayerId_;
         int FromPlanetId_;
         int ToPlanetId_;
@@ -27,7 +28,6 @@ struct TGameState {
     };
 
     struct TPlanetInfo {
-        bool Captured_;
         int PlayerId_;
         int ShipCount_;
         int Level_;
@@ -35,7 +35,7 @@ struct TGameState {
     };
 
     std::vector<TPlanetInfo> PlanetInfos_;
-    std::vector<TShipMove> ShipMoves_;
+    std::vector<TShipGroup> ShipGropus_;
 };
 
 #endif // AURALUX_GAME_STATE_H
