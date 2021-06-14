@@ -37,7 +37,6 @@ public:
     explicit TGame(const TConfig& config);
 
     void AddPlayer(std::unique_ptr<IPlayer> player);
-
     void Process();
 
 private:
@@ -46,10 +45,9 @@ private:
     void PrePlayerMove(int playerId);
     void PlayerMove(int playerId);
 
-    bool IsPlayerDead(int playerId);
-    int GetShipGroupsInSpace(int playerId);
-
-    bool IsValidPlanetId(int planetId);
+    bool IsPlayerDead(int playerId) const;
+    int GetShipGroupsInSpace(int playerId) const;
+    bool IsValidPlanetId(int planetId) const ;
 
 private:
     const TConfig Config_;

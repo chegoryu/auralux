@@ -21,11 +21,11 @@ TGame::TGame(const TConfig& config)
     }
 
     for (size_t i = 0; i < config.GameMap_.StartPlanets_.size(); ++i) {
-        int planetId = config.GameMap_.StartPlanets_[i] - 1;
-        GameState_.PlanetInfos_[planetId].PlayerId_ = i + 1;
-        GameState_.PlanetInfos_[planetId].ShipCount_ = Config_.StartShipsCount_;
-        GameState_.PlanetInfos_[planetId].Level_ = 1;
-        GameState_.PlanetInfos_[planetId].Armor_ = Config_.PerLevelPlanetArmor_[GameState_.PlanetInfos_[planetId].Level_];
+        auto& planet = GameState_.PlanetInfos_.at(config.GameMap_.StartPlanets_.at(i) - 1);
+        planet.PlayerId_ = i + 1;
+        planet.ShipCount_ = Config_.StartShipsCount_;
+        planet.Level_ = 1;
+        planet.Armor_ = Config_.PerLevelPlanetArmor_[planet.Level_];
     }
 
     GameState_.IsFirstStep_ = true;
@@ -71,7 +71,7 @@ void TGame::Step() {
         try {
             PlayerMove(static_cast<int>(i));
         } catch (...) {
-            Players_[i - 1].IsDisqualified_ = true;
+            Players_.at(i - 1).IsDisqualified_ = true;
         }
     }
 
@@ -85,7 +85,7 @@ void TGame::PrePlayerMove(int playerId) {
         return;
     }
 
-    LastShipMovesByPlayer_[playerId - 1].ShipMoves_.clear();
+    LastShipMovesByPlayer_.at(playerId - 1).ShipMoves_.clear();
 
     // Production
     for (auto& planetInfo : GameState_.PlanetInfos_) {
@@ -100,7 +100,7 @@ void TGame::PrePlayerMove(int playerId) {
         if (shipGroup.PlayerId_ == playerId) {
             if (--shipGroup.TimeToDestination_ == 0) {
                 assert(shipGroup.FromPlanetId_ != shipGroup.ToPlanetId_);
-                auto& currentPlanet = GameState_.PlanetInfos_[shipGroup.ToPlanetId_ - 1];
+                auto& currentPlanet = GameState_.PlanetInfos_.at(shipGroup.ToPlanetId_ - 1);
 
                 if (currentPlanet.PlayerId_ == playerId) {
                     currentPlanet.ShipCount_ += shipGroup.Count_;
@@ -138,7 +138,7 @@ void TGame::PrePlayerMove(int playerId) {
 }
 
 void TGame::PlayerMove(int playerId) {
-    auto& playerInfo = Players_[playerId - 1];
+    auto& playerInfo = Players_.at(playerId - 1);
     if (playerInfo.IsDisqualified_ || playerInfo.IsDead_) {
         return;
     }
@@ -170,7 +170,7 @@ void TGame::PlayerMove(int playerId) {
             continue;
         }
 
-        auto& fromPlanet = GameState_.PlanetInfos_[shipMove.FromPlanetId_ - 1];
+        auto& fromPlanet = GameState_.PlanetInfos_.at(shipMove.FromPlanetId_ - 1);
         if (fromPlanet.PlayerId_ != playerId) {
             continue;
         }
@@ -188,20 +188,20 @@ void TGame::PlayerMove(int playerId) {
                 if (shipMove.Count_ >= Config_.ShipsToCapturePlanet_) {
                     fromPlanet.ShipCount_ -= Config_.ShipsToCapturePlanet_;
                     fromPlanet.Level_ = 1;
-                    fromPlanet.Armor_ = Config_.PerLevelPlanetArmor_[fromPlanet.Level_];
+                    fromPlanet.Armor_ = Config_.PerLevelPlanetArmor_.at(fromPlanet.Level_);
                     alreadyUpgraded_.insert(shipMove.FromPlanetId_);
                     continue;
                 }
             } else {
-                int ArmorToRestore = Config_.PerLevelPlanetArmor_[fromPlanet.Level_] - fromPlanet.Armor_;
+                int ArmorToRestore = Config_.PerLevelPlanetArmor_.at(fromPlanet.Level_) - fromPlanet.Armor_;
 
                 if (fromPlanet.Level_ < Config_.ShipsToUpgradePlanet_.size()) {
-                    int ShipsToUpgrade = Config_.ShipsToUpgradePlanet_[fromPlanet.Level_] + ArmorToRestore;
+                    int ShipsToUpgrade = Config_.ShipsToUpgradePlanet_.at(fromPlanet.Level_) + ArmorToRestore;
 
                     if (shipMove.Count_ >= ShipsToUpgrade) {
                         fromPlanet.ShipCount_ -= ShipsToUpgrade;
                         ++fromPlanet.Level_;
-                        fromPlanet.Armor_ = Config_.PerLevelPlanetArmor_[fromPlanet.Level_];
+                        fromPlanet.Armor_ = Config_.PerLevelPlanetArmor_.at(fromPlanet.Level_);
                         alreadyUpgraded_.insert(shipMove.FromPlanetId_);
                         continue;
                     }
@@ -217,7 +217,7 @@ void TGame::PlayerMove(int playerId) {
             ++shipGroupsInSpace;
 
             fromPlanet.ShipCount_ -= shipMove.Count_;
-            LastShipMovesByPlayer_[playerId - 1].ShipMoves_.push_back({
+            LastShipMovesByPlayer_.at(playerId - 1).ShipMoves_.push_back({
                 .PlayerId_ = playerId,
                 .FromPlanetId_ = shipMove.FromPlanetId_,
                 .ToPlanetId_ = shipMove.ToPlanetId_,
@@ -228,7 +228,7 @@ void TGame::PlayerMove(int playerId) {
                 .FromPlanetId_ = shipMove.FromPlanetId_,
                 .ToPlanetId_ = shipMove.ToPlanetId_,
                 .Count_ = shipMove.Count_,
-                .TimeToDestination_ = Config_.GameMap_.Dists_[shipMove.FromPlanetId_ - 1][shipMove.ToPlanetId_ - 1],
+                .TimeToDestination_ = Config_.GameMap_.Dists_.at(shipMove.FromPlanetId_ - 1).at(shipMove.ToPlanetId_ - 1),
             });
 
             if (fromPlanet.ShipCount_ == 0 && fromPlanet.Level_ == 0) {
@@ -238,7 +238,7 @@ void TGame::PlayerMove(int playerId) {
     }
 }
 
-bool TGame::IsPlayerDead(int playerId) {
+bool TGame::IsPlayerDead(int playerId) const {
     for (const auto& planetInfo : GameState_.PlanetInfos_) {
         if (planetInfo.PlayerId_ == playerId) {
             assert(planetInfo.Level_ > 0 || planetInfo.ShipCount_ > 0);
@@ -253,7 +253,7 @@ bool TGame::IsPlayerDead(int playerId) {
     return true;
 }
 
-int TGame::GetShipGroupsInSpace(int playerId) {
+int TGame::GetShipGroupsInSpace(int playerId) const {
     int ret = 0;
     for (const auto& shipMove : GameState_.ShipGropus_) {
         if (shipMove.PlayerId_ == playerId) {
@@ -263,6 +263,6 @@ int TGame::GetShipGroupsInSpace(int playerId) {
     return ret;
 }
 
-bool TGame::IsValidPlanetId(int planetId) {
+bool TGame::IsValidPlanetId(int planetId) const {
     return 1 <= planetId && planetId <= GameState_.PlanetInfos_.size();
 }
