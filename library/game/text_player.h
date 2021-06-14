@@ -17,9 +17,13 @@ public:
     TPlayerMove GetMove(const TGameState& gameInfo) override;
 
 protected:
-    virtual void WriteGameInfo(const TGameInfo& gameInfo) = 0;
-    virtual void WriteGameState(const TGameState& gameState) = 0;
-    virtual TPlayerMove ReadPlayerMove() = 0;
+    virtual std::string ReadLine() = 0;
+    virtual void WriteLine(const std::string& line) = 0;
+
+private:
+    void WriteGameInfo(const TGameInfo& gameInfo);
+    void WriteGameState(const TGameState& gameState);
+    TPlayerMove ReadPlayerMove();
 };
 
 #endif // AURALUX_TEXT_PLAYER_H

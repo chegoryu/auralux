@@ -12,3 +12,19 @@ TPlayerMove TTextPlayer::GetMove(const TGameState& gameState) {
     WriteGameState(gameState);
     return ReadPlayerMove();
 }
+
+void TTextPlayer::WriteGameInfo(const TGameInfo& gameInfo) {
+    (void)gameInfo;
+    // TODO
+}
+
+void TTextPlayer::WriteGameState(const TGameState& gameState) {
+    (void)gameState;
+    // TODO
+}
+
+TPlayerMove TTextPlayer::ReadPlayerMove() {
+    // TODO
+    return {};
+}
+

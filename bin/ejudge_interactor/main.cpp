@@ -14,14 +14,11 @@ class TEjudgePlayer : public TTextPlayer {
 public:
     using TTextPlayer::TTextPlayer;
 
-    void WriteGameInfo(const TGameInfo& gameInfo) override {
-
+    std::string ReadLine() override {
+        return ouf.readLine();
     }
-    void WriteGameState(const TGameState& gameState) override {
-
-    }
-    TPlayerMove ReadPlayerMove() override {
-        return {};
+    virtual void WriteLine(const std::string& line) override {
+        std::cout << line << std::endl;
     }
 };
 
