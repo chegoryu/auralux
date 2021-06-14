@@ -230,6 +230,10 @@ void TGame::PlayerMove(int playerId) {
                 .Count_ = shipMove.Count_,
                 .TimeToDestination_ = Config_.GameMap_.Dists_[shipMove.FromPlanetId_ - 1][shipMove.ToPlanetId_ - 1],
             });
+
+            if (fromPlanet.ShipCount_ == 0 && fromPlanet.Level_ == 0) {
+                fromPlanet.PlayerId_ = 0;
+            }
         }
     }
 }

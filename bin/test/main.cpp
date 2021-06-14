@@ -4,7 +4,6 @@
 
 int main(int argc, char *argv[]) {
     TGame::TConfig config;
-    config.MaxSteps_ = 10;
 
     config.GameMap_ = {
         .StartPlanets_ = {1, 4},
@@ -15,6 +14,8 @@ int main(int argc, char *argv[]) {
             {3, 3, 3, 0},
         },
     };
+
+    config.PlanetProductionMultiply_ = 100;
 
     TGame game(config);
 
