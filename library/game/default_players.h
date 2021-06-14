@@ -16,6 +16,28 @@ public:
     TPlayerMove GetMove(const TGameState& gameState, const TLastShipMoves& lastShipMoves) override;
 };
 
+class TDisqualifyPlayer : public IPlayer {
+public:
+    using IPlayer::IPlayer;
+
+    void SendGameInfo(const TGameInfo& gameInfo) override;
+    TPlayerMove GetMove(const TGameState& gameState, const TLastShipMoves& lastShipMoves) override;
+
+private:
+    int StepToDisqualify_ = 100;
+};
+
+class TUpgradeAndRepairMainPlayer : public IPlayer {
+public:
+    using IPlayer::IPlayer;
+
+    void SendGameInfo(const TGameInfo& gameInfo) override;
+    TPlayerMove GetMove(const TGameState& gameState, const TLastShipMoves& lastShipMoves) override;
+
+private:
+    int PlayerId_;
+};
+
 class TStdinStdoutPlayer : public TTextPlayer {
 public:
     using TTextPlayer::TTextPlayer;

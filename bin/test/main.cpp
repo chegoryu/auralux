@@ -5,16 +5,18 @@
 #include <fstream>
 #include <iostream>
 
-int main(int argc, char *argv[]) {
+TGameMap ReadMapFromFile(const std::string fileName) {
+    std::ifstream stream(fileName);
+    return LoadPlanarGraph([&stream]() {
+        int x;
+        stream >> x;
+        return x;
+    });
+}
+
+TGame GetSmallGame() {
     TGame::TConfig config;
-    {
-        std::ifstream stream("small_map.txt");
-        config.GameMap_ = LoadPlanarGraph([&stream]() {
-            int x;
-            stream >> x;
-            return x;
-        });
-    }
+    config.GameMap_ = ReadMapFromFile("small_map.txt");
 
     config.PlanetProductionMultiply_ = 100;
 
@@ -22,6 +24,26 @@ int main(int argc, char *argv[]) {
 
     game.AddPlayer(std::make_unique<TAFKPlayer>());
     game.AddPlayer(std::make_unique<TStdinStdoutPlayer>(config.MaxPlayerShipMovesPerStep_));
+
+    return std::move(game);
+}
+
+TGame GetBigGame() {
+    TGame::TConfig config;
+    config.GameMap_ = ReadMapFromFile("big_map.txt");
+
+    TGame game(config);
+
+    game.AddPlayer(std::make_unique<TUpgradeAndRepairMainPlayer>());
+    game.AddPlayer(std::make_unique<TDisqualifyPlayer>());
+    game.AddPlayer(std::make_unique<TUpgradeAndRepairMainPlayer>());
+    game.AddPlayer(std::make_unique<TAFKPlayer>());
+
+    return std::move(game);
+}
+
+int main(int argc, char *argv[]) {
+    TGame game = GetBigGame();
     game.Process();
 
     auto errors = game.GetGameLogger().GetErrors();

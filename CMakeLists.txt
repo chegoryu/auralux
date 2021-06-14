@@ -39,6 +39,7 @@ set(LIBRARY_GAME
 set(LIBRARY_TESTLIB library/testlib/testlib.h)
 
 configure_file(${CMAKE_SOURCE_DIR}/library/maps/small_map.txt ${CMAKE_CURRENT_BINARY_DIR})
+configure_file(${CMAKE_SOURCE_DIR}/library/maps/big_map.txt ${CMAKE_CURRENT_BINARY_DIR})
 
 # Test binary
 add_executable(test bin/test/main.cpp ${LIBRARY_GAME})
