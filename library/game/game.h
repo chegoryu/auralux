@@ -16,7 +16,7 @@ public:
         int StartShipsCount_ = 100;
 
         int ShipsToCapturePlanet_ = 100;
-        std::vector<int> ShipsToUpgradePlanet_ = {0, 100, 200, 400};
+        std::vector<int> ShipsToUpgradePlanet_ = {0, 100, 200};
         std::vector<int> PerLevelPlanetArmor_ = {0, 100, 200, 300};
         int PlanetProductionMultiply_ = 1;
 

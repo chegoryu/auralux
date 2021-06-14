@@ -7,22 +7,31 @@
 #include <sstream>
 
 /*
- INIT INFO START
- PlayerId PlayerCount PlanetCount
- <Matrix PlanetCount x PlanetCount>
- INIT INFO END
+    INIT INFO START
+    PlayerId PlayerCount PlanetCount
+    <Matrix PlanetCount x PlanetCount>
+    INIT INFO END
 */
 
 /*
- PER MOVE INFO START
+    PER MOVE INFO START
 
- <PlanetCount lines>
- Captured PlayerId ShipCount Level Armor
+    <PlanetCount lines>
+    Captured PlayerId ShipCount Level Armor
 
- <number of moves>
- PlayerId FromPlanetId ToPlanetId Count
+    <number of moves>
+    PlayerId FromPlanetId ToPlanetId Count
 
- PER MOVE INFO END
+    PER MOVE INFO END
+*/
+
+/*
+    PLAYER MOVE BEGIN
+
+    <number of moves>
+    FromPlanetId ToPlanetId Count
+
+    PLAYER MOVE END
 */
 
 void TTextPlayer::SendGameInfo(const TGameInfo& gameInfo) {
@@ -81,17 +90,19 @@ void TTextPlayer::WriteGameState(const TGameState& gameState, const TLastShipMov
     }
 }
 
+#include <iostream>
 TPlayerMove TTextPlayer::ReadPlayerMove() {
     TPlayerMove playerMove;
 
     int moveCount = 0;
     {
         std::stringstream ss(ReadLine());
-        if (!ss >> moveCount) {
+        if (!(ss >> moveCount)) {
             playerMove.DisqualifyMe_ = true;
             return playerMove;
         }
     }
+
     for (int i = 0; i < moveCount; ++i) {
         std::stringstream ss(ReadLine());
 

@@ -36,6 +36,7 @@ struct TGameState {
 
     std::vector<TPlanetInfo> PlanetInfos_;
     std::vector<TShipGroup> ShipGropus_;
+    bool IsFirstStep_ = true;
 };
 
 #endif // AURALUX_GAME_STATE_H
