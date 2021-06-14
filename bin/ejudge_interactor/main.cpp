@@ -85,4 +85,3 @@ int main(int argc, char *argv[]) {
 
     quitf(_ok, "Winner is %d", ejudgePlayerId + 1);
 }
-
