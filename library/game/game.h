@@ -5,6 +5,7 @@
 #ifndef AURALUX_GAME_H
 #define AURALUX_GAME_H
 
+#include "game_state.h"
 #include "player.h"
 
 class TGame {

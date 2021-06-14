@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 include_directories(.)
 
-SET(LIBRARY_GAME library/game/game.cpp library/game/game.h library/game/player.cpp library/game/player.h library/game/text_player.h library/game/text_player.cpp library/game/default_players.h library/game/default_players.cpp)
+SET(LIBRARY_GAME library/game/game.cpp library/game/game.h library/game/player.cpp library/game/player.h library/game/text_player.h library/game/text_player.cpp library/game/default_players.h library/game/default_players.cpp library/game/game_state.cpp library/game/game_state.h)
 SET(LIBRARY_TESTLIB library/testlib/testlib.h)
 
 add_executable(test bin/test/main.cpp ${LIBRARY_GAME})
