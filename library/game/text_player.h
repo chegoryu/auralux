@@ -9,9 +9,9 @@
 
 #include <string>
 
-class TTextPlayer : public TPlayer {
+class TTextPlayer : public IPlayer {
 public:
-    using TPlayer::TPlayer;
+    using IPlayer::IPlayer;
 
     void SendGameInfo(const TGameInfo& gameInfo) override;
     TPlayerMove GetMove(const TGameState& gameInfo) override;

@@ -11,18 +11,19 @@ class TGame {
 public:
     struct TConfig {
         int MaxSteps_ = 0;
+        TGameMap GameMap_;
     };
 
 private:
     struct TPlayerInfo {
-        std::unique_ptr<TPlayer> PlayerEngine_;
+        std::unique_ptr<IPlayer> PlayerEngine_;
         bool IsDisqualified_;
     };
 
 public:
     TGame(const TConfig& config);
 
-    void AddPlayer(std::unique_ptr<TPlayer> player);
+    void AddPlayer(std::unique_ptr<IPlayer> player);
 
     void Process();
 

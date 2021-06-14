@@ -9,7 +9,7 @@ TGame::TGame(const TConfig& config)
 {
 }
 
-void TGame::AddPlayer(std::unique_ptr<TPlayer> player) {
+void TGame::AddPlayer(std::unique_ptr<IPlayer> player) {
     Players_.push_back({
         .PlayerEngine_ = std::move(player),
         .IsDisqualified_ = false,

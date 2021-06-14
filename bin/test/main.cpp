@@ -2,19 +2,8 @@
 // #include <QDebug>
 
 #include "library/game/game.h"
-#include "library/game/player.h"
 
-class TFakePlayer : public TPlayer {
-public:
-    using TPlayer::TPlayer;
-
-    void SendGameInfo(const TGameInfo& gameInfo) override {
-
-    }
-    TPlayerMove GetMove(const TGameState& gameState) override {
-        return {};
-    }
-};
+#include "library/game/default_players.h"
 
 int main(int argc, char *argv[]) {
     TGame::TConfig config;
@@ -22,7 +11,7 @@ int main(int argc, char *argv[]) {
 
     TGame game(config);
 
-    game.AddPlayer(std::make_unique<TFakePlayer>());
+    game.AddPlayer(std::make_unique<TAFKPlayer>());
     game.Process();
 
     return 0;

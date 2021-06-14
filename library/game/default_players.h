@@ -7,9 +7,9 @@
 
 #include "player.h"
 
-class TAFKPlayer : public TPlayer {
+class TAFKPlayer : public IPlayer {
 public:
-    using TPlayer::TPlayer;
+    using IPlayer::IPlayer;
 
     void SendGameInfo(const TGameInfo& gameInfo) override;
     TPlayerMove GetMove(const TGameState& gameState) override;

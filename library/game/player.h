@@ -7,9 +7,14 @@
 
 #include <vector>
 
+struct TGameMap {
+
+};
+
 struct TGameInfo {
     int PlayerId_;
-    // TODO game map
+    int PlayerCount_;
+    TGameMap GameMap_;
 };
 
 struct TGameState {
@@ -43,10 +48,10 @@ struct TPlayerMove {
     std::vector<TShipMove> ShipMoves_;
 };
 
-class TPlayer {
+class IPlayer {
 public:
-    TPlayer() = default;
-    virtual ~TPlayer() = default;
+    IPlayer() = default;
+    virtual ~IPlayer() = default;
 
     virtual void SendGameInfo(const TGameInfo& gameInfo) = 0;
     virtual TPlayerMove GetMove(const TGameState& gameState) = 0;
