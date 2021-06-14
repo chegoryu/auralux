@@ -29,6 +29,10 @@ std::pair<std::vector<std::unique_ptr<IPlayer>>, int> ReadPlayers(const TGame::T
 
         if (playerType == "afk") {
             players.push_back(std::make_unique<TAFKPlayer>());
+        } else if (playerType == "upgrade_and_repair_main") {
+            players.push_back(std::make_unique<TUpgradeAndRepairMainPlayer>());
+        } else if (playerType == "aggressive_expansion") {
+            players.push_back(std::make_unique<TAggressiveExpansionPlayer>());
         } else if (playerType == "ejudge") {
             assert(ejudgePlayerId == -1);
             ejudgePlayerId = static_cast<int>(i);

@@ -51,6 +51,7 @@ private:
 private:
     static constexpr int MAX_PLANET_LEVEL = 3;
     static constexpr int MIN_SHIPS_TO_MOVE = 100;
+    static constexpr int MIN_ARMOR_TO_REPAIR[] = {0, 75, 150, 225};
 
     std::vector<int> PlanetOrder_;
     int PlayerId_;

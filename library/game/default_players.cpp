@@ -89,7 +89,9 @@ TPlayerMove TAggressiveExpansionPlayer::GetMove(const TGameState& gameState, con
             continue;
         }
         if (planetInfo.PlayerId_ == PlayerId_) {
-            if (planetInfo.Level_ < TAggressiveExpansionPlayer::MAX_PLANET_LEVEL) {
+            if (planetInfo.Level_ < TAggressiveExpansionPlayer::MAX_PLANET_LEVEL
+                || planetInfo.Armor_ < TAggressiveExpansionPlayer::MIN_ARMOR_TO_REPAIR[planetInfo.Level_]
+            ) {
                 playerMove.ShipMoves_.push_back({
                     .FromPlanetId_ = static_cast<int>(i + 1),
                     .ToPlanetId_ = static_cast<int>(i + 1),
