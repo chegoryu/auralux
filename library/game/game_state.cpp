@@ -21,10 +21,10 @@ void PrintGameState(std::ostream& stream, const TGameState& gameState) {
     {
         for (const auto& planetInfo : gameState.PlanetInfos_) {
             stream
-                    << planetInfo.PlayerId_ << " "
-                    << planetInfo.ShipCount_ << " "
-                    << planetInfo.Level_ << " "
-                    << planetInfo.Armor_ << std::endl;
+                << planetInfo.PlayerId_ << " "
+                << planetInfo.ShipCount_ << " "
+                << planetInfo.Level_ << " "
+                << planetInfo.Armor_ << std::endl;
         }
     }
 
