@@ -6,13 +6,17 @@
 
 TPlayerMove TTextPlayer::GetMove(const TGameInfo& gameInfo) {
     (void)gameInfo;
+
     // TODO Create gameInfoStr
-
     // WriteGameInfo(gameInfoStr);
-    // std::string playerMoveStr = ReadPlayerMove();
 
-    // create playerMove
+    TPlayerMove playerMove;
+    try {
+        playerMove = ReadPlayerMove();
+    } catch (...) {
+        playerMove.DisqualifyMe_ = true;
+        playerMove.ShipMoves_.clear();
+    }
 
-    // return playerMove;
-    return {};
+    return playerMove;
 }

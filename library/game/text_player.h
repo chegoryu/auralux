@@ -17,7 +17,7 @@ public:
 
 protected:
     virtual void WriteGameInfo(const std::string& gameInfoStr) = 0;
-    virtual std::string ReadPlayerMove() = 0;
+    virtual TPlayerMove ReadPlayerMove() = 0;
 };
 
 #endif //AURALUX_TEXT_PLAYER_H
