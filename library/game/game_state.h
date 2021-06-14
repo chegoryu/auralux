@@ -7,6 +7,7 @@
 
 #include "game_map.h"
 
+#include <ostream>
 #include <set>
 #include <vector>
 
@@ -39,5 +40,7 @@ struct TGameState {
     std::vector<int> DeadPlayers_;
     bool IsFirstStep_ = true;
 };
+
+void PrintGameState(std::ostream& stream, const TGameState& gameState);
 
 #endif // AURALUX_GAME_STATE_H

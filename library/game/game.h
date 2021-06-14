@@ -6,6 +6,7 @@
 #define AURALUX_GAME_H
 
 #include "game_state.h"
+#include "game_logger.h"
 #include "player.h"
 
 class TGame {
@@ -39,6 +40,8 @@ public:
     void AddPlayer(std::unique_ptr<IPlayer> player);
     void Process();
 
+    [[nodiscard]] const TGameLogger& GetGameLogger() const;
+
 private:
     bool Init();
     bool Step();
@@ -52,12 +55,13 @@ private:
     int GetShipGroupsInSpace(int playerId) const;
     bool IsValidPlanetId(int planetId) const ;
 
-
 private:
     const TConfig Config_;
     TGameState GameState_;
     std::vector<TLastShipMoves> LastShipMovesByPlayer_;
     std::vector<TPlayerInfo> Players_;
+
+    TGameLogger GameLogger_;
 };
 
 #endif // AURALUX_GAME_H

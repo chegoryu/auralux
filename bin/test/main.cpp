@@ -3,6 +3,7 @@
 #include "library/game/default_players.h"
 
 #include <fstream>
+#include <iostream>
 
 int main(int argc, char *argv[]) {
     TGame::TConfig config;
@@ -22,6 +23,13 @@ int main(int argc, char *argv[]) {
     game.AddPlayer(std::make_unique<TAFKPlayer>());
     game.AddPlayer(std::make_unique<TStdinStdoutPlayer>());
     game.Process();
+
+    auto errors = game.GetGameLogger().GetErrors();
+    for (const auto& error : errors) {
+        std::cout << error << std::endl;
+    }
+
+    PrintGameState(std::cout, game.GetGameLogger().GetFinalGameState());
 
     return 0;
 }

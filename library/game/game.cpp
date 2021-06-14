@@ -47,14 +47,19 @@ void TGame::AddPlayer(std::unique_ptr<IPlayer> player) {
 void TGame::Process() {
     assert(Players_.size() == Config_.GameMap_.StartPlanets_.size());
 
-    if (!Init()) {
-        return;
-    }
-    for (int stepId = 0; stepId < Config_.MaxSteps_; ++stepId) {
-        if (!Step()) {
-            break;
+    if (Init()) {
+        for (int stepId = 0; stepId < Config_.MaxSteps_; ++stepId) {
+            if (!Step()) {
+                break;
+            }
         }
     }
+
+    GameLogger_.LogFinalState(GameState_);
+}
+
+const TGameLogger& TGame::GetGameLogger() const {
+    return GameLogger_;
 }
 
 bool TGame::Init() {
@@ -80,8 +85,10 @@ bool TGame::Step() {
         try {
             PlayerMove(static_cast<int>(i));
         } catch (...) {
-            Players_.at(i - 1).IsDisqualified_ = true;
+            DisqualifyPlayer(i - 1);
         }
+
+        GameLogger_.LogGameState(GameState_);
 
         if (GameState_.AlivePlayers_.size() <= 1) {
             return false;
@@ -159,7 +166,7 @@ void TGame::PlayerMove(int playerId) {
     }
 
     if (IsPlayerDead(playerId)) {
-        playerInfo.IsDead_ = true;
+        MarkPlayerAsDead(playerId);
         return;
     }
 
@@ -173,7 +180,7 @@ void TGame::PlayerMove(int playerId) {
 
     TPlayerMove playerMove = playerInfo.PlayerEngine_->GetMove(GameState_, lastShipMoves);
     if (playerMove.DisqualifyMe_) {
-        playerInfo.IsDisqualified_ = true;
+        DisqualifyPlayer(playerId);
         return;
     }
 
@@ -182,20 +189,36 @@ void TGame::PlayerMove(int playerId) {
     std::set<int> alreadyUpgraded_;
     for (const auto& shipMove : playerMove.ShipMoves_) {
         if (!IsValidPlanetId(shipMove.FromPlanetId_) || !IsValidPlanetId(shipMove.ToPlanetId_) || shipMove.Count_ <= 0) {
+            GameLogger_.LogInvalidMove(playerId, shipMove, "Planet ids or ship count invalid");
             continue;
         }
 
         auto& fromPlanet = GameState_.PlanetInfos_.at(shipMove.FromPlanetId_ - 1);
         if (fromPlanet.PlayerId_ != playerId) {
+            GameLogger_.LogInvalidMove(
+                playerId,
+                shipMove,
+                "planet " + std::to_string(shipMove.FromPlanetId_) + " belongs to another player"
+            );
             continue;
         }
 
         if (fromPlanet.ShipCount_ < shipMove.Count_) {
+            GameLogger_.LogInvalidMove(
+                playerId,
+                shipMove,
+                "planet " + std::to_string(shipMove.FromPlanetId_) + " belongs to another player"
+            );
             continue;
         }
 
         if (shipMove.FromPlanetId_ == shipMove.ToPlanetId_) {
             if (alreadyUpgraded_.find(shipMove.FromPlanetId_) != alreadyUpgraded_.end()) {
+                GameLogger_.LogInvalidMove(
+                    playerId,
+                    shipMove,
+                    "planet " + std::to_string(shipMove.FromPlanetId_) + " already upgraded"
+                );
                 continue;
             }
 
@@ -227,6 +250,11 @@ void TGame::PlayerMove(int playerId) {
             }
         } else {
             if (shipGroupsInSpace >= Config_.MaxShipGroupsInSpace_) {
+                GameLogger_.LogInvalidMove(
+                    playerId,
+                    shipMove,
+                    "too many ship groups in space"
+                );
                 continue;
             }
             ++shipGroupsInSpace;
