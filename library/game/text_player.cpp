@@ -4,19 +4,11 @@
 
 #include "text_player.h"
 
-TPlayerMove TTextPlayer::GetMove(const TGameInfo& gameInfo) {
-    (void)gameInfo;
+void TTextPlayer::SendGameInfo(const TGameInfo& gameInfo) {
+    WriteGameInfo(gameInfo);
+}
 
-    // TODO Create gameInfoStr
-    // WriteGameInfo(gameInfoStr);
-
-    TPlayerMove playerMove;
-    try {
-        playerMove = ReadPlayerMove();
-    } catch (...) {
-        playerMove.DisqualifyMe_ = true;
-        playerMove.ShipMoves_.clear();
-    }
-
-    return playerMove;
+TPlayerMove TTextPlayer::GetMove(const TGameState& gameState) {
+    WriteGameState(gameState);
+    return ReadPlayerMove();
 }

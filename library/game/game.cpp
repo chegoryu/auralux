@@ -10,12 +10,29 @@ TGame::TGame(const TConfig& config)
 }
 
 void TGame::AddPlayer(std::unique_ptr<TPlayer> player) {
-    Players_.push_back(std::move(player));
+    Players_.push_back({
+        .PlayerEngine_ = std::move(player),
+        .IsDisqualified_ = false,
+    });
 }
 
-void TGame::LoadConfig(const TConfig& config) {
-    (void)config;
-    // TODO
+void TGame::Process() {
+    Init();
+    for (int stepId = 0; stepId < Config_.MaxSteps_; ++stepId) {
+        Step();
+    }
+
+    // TODO some game result
+}
+
+void TGame::Init() {
+    for (auto& player : Players_) {
+        try {
+            player.PlayerEngine_->SendGameInfo({} /* TODO gameInfo */);
+        } catch (...) {
+            player.IsDisqualified_ = true;
+        }
+    }
 }
 
 void TGame::Step() {

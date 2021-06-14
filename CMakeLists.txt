@@ -12,7 +12,9 @@ set(CMAKE_CXX_STANDARD 17)
 
 include_directories(.)
 
-add_executable(test bin/test/main.cpp library/game/game.cpp library/game/game.h library/game/player.cpp library/game/player.h library/game/text_player.h library/game/text_player.cpp)
+add_executable(test bin/test/main.cpp library/game/game.cpp library/game/game.h library/game/player.cpp library/game/player.h library/game/text_player.h library/game/text_player.cpp library/testlib/testlib.h)
+add_executable(ejudge_interactor bin/ejudge_interactor/main.cpp library/game/game.cpp library/game/game.h library/game/player.cpp library/game/player.h library/game/text_player.h library/game/text_player.cpp library/testlib/testlib.h)
+
 
 # if (NOT CMAKE_PREFIX_PATH)
 #     message(WARNING "CMAKE_PREFIX_PATH is not defined, you may need to set it "

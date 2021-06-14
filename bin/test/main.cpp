@@ -8,19 +8,22 @@ class TFakePlayer : public TPlayer {
 public:
     using TPlayer::TPlayer;
 
-    TPlayerMove GetMove(const TGameInfo& gameInfo) override {
+    void SendGameInfo(const TGameInfo& gameInfo) override {
+
+    }
+    TPlayerMove GetMove(const TGameState& gameState) override {
         return {};
     }
 };
 
 int main(int argc, char *argv[]) {
     TGame::TConfig config;
-    config.SomeVal_ = -1;
+    config.MaxSteps_ = 10;
 
     TGame game(config);
 
     game.AddPlayer(std::make_unique<TFakePlayer>());
-    game.Step();
+    game.Process();
 
     return 0;
     // QCoreApplication a(argc, argv);

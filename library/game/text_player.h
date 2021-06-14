@@ -13,11 +13,13 @@ class TTextPlayer : public TPlayer {
 public:
     using TPlayer::TPlayer;
 
-    TPlayerMove GetMove(const TGameInfo& gameInfo) override;
+    void SendGameInfo(const TGameInfo& gameInfo) override;
+    TPlayerMove GetMove(const TGameState& gameInfo) override;
 
 protected:
-    virtual void WriteGameInfo(const std::string& gameInfoStr) = 0;
+    virtual void WriteGameInfo(const TGameInfo& gameInfo) = 0;
+    virtual void WriteGameState(const TGameState& gameState) = 0;
     virtual TPlayerMove ReadPlayerMove() = 0;
 };
 
-#endif //AURALUX_TEXT_PLAYER_H
+#endif // AURALUX_TEXT_PLAYER_H

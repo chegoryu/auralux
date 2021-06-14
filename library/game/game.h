@@ -10,7 +10,13 @@
 class TGame {
 public:
     struct TConfig {
-        int SomeVal_ = 0;
+        int MaxSteps_ = 0;
+    };
+
+private:
+    struct TPlayerInfo {
+        std::unique_ptr<TPlayer> PlayerEngine_;
+        bool IsDisqualified_;
     };
 
 public:
@@ -18,12 +24,15 @@ public:
 
     void AddPlayer(std::unique_ptr<TPlayer> player);
 
-    void LoadConfig(const TConfig& config);
+    void Process();
+
+private:
+    void Init();
     void Step();
 
 private:
     const TConfig Config_;
-    std::vector<std::unique_ptr<TPlayer>> Players_;
+    std::vector<TPlayerInfo> Players_;
 };
 
-#endif //AURALUX_GAME_H
+#endif // AURALUX_GAME_H

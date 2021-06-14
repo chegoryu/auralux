@@ -8,6 +8,11 @@
 #include <vector>
 
 struct TGameInfo {
+    int PlayerId_;
+    // TODO game map
+};
+
+struct TGameState {
     struct TShipMove {
         int PlayerId_;
         int FromPlanetId_;
@@ -43,7 +48,8 @@ public:
     TPlayer() = default;
     virtual ~TPlayer() = default;
 
-    virtual TPlayerMove GetMove(const TGameInfo& gameInfo) = 0;
+    virtual void SendGameInfo(const TGameInfo& gameInfo) = 0;
+    virtual TPlayerMove GetMove(const TGameState& gameState) = 0;
 };
 
-#endif //AURALUX_PLAYER_H
+#endif // AURALUX_PLAYER_H
