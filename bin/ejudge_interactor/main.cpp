@@ -39,7 +39,7 @@ std::pair<std::vector<std::unique_ptr<IPlayer>>, int> ReadPlayers(int playerCoun
     }
     assert(ejudgePlayerId != -1);
 
-    return {players, ejudgePlayerId};
+    return {std::move(players), ejudgePlayerId};
 }
 
 int main(int argc, char *argv[]) {
@@ -57,6 +57,32 @@ int main(int argc, char *argv[]) {
     }
     game.Process();
 
-    return 0;
+    const auto& gameLogger = game.GetGameLogger();
+
+    const auto& errors = gameLogger.GetErrors();
+    const auto& finalGameState = gameLogger.GetFinalGameState();
+
+    PrintGameState(tout, finalGameState);
+    for (const auto& error : errors) {
+        tout << error << std::endl;
+    }
+
+    if (finalGameState.AlivePlayers_.size() > 1) {
+        quitf(_wa, "No winner (too many alive players)");
+    }
+    if (finalGameState.AlivePlayers_.empty()) {
+        quitf(_wa, "No winner (all players are not alive)");
+    }
+    int winner = *finalGameState.AlivePlayers_.begin();
+
+    if (winner -1 != ejudgePlayerId) {
+        quitf(_wa, "Winner is %d, but ejudge player id is %d", winner, ejudgePlayerId + 1);
+    }
+
+    if (!errors.empty()) {
+        quitf(_wa, "Errors not empty (strict format checking in ejudge)");
+    }
+
+    quitf(_ok, "Winner is %d", ejudgePlayerId + 1);
 }
 
