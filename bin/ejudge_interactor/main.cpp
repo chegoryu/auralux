@@ -2,11 +2,11 @@
 // Created by Egor Chunaev on 14.06.2021.
 //
 
+#include "library/testlib/testlib.h"
+
 #include "library/game/game.h"
 #include "library/game/game_map.h"
 #include "library/game/default_players.h"
-
-#include "library/ejudge/ejudge_player.h"
 
 class TEjudgePlayer : public TTextPlayer {
 public:
