@@ -12,7 +12,7 @@ public:
     using IPlayer::IPlayer;
 
     void SendGameInfo(const TGameInfo& gameInfo) override;
-    TPlayerMove GetMove(const TGameState& gameState) override;
+    TPlayerMove GetMove(const TGameState& gameState, const TLastShipMoves& lastShipMoves) override;
 };
 
 #endif //AURALUX_DEFAULT_PLAYERS_H

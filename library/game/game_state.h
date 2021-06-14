@@ -27,14 +27,15 @@ struct TGameState {
     };
 
     struct TPlanetInfo {
-        bool Captured_ = false;
-        int PlayerId_ = 0;
-        int ShipCount_ = 0;
-        int Level_ = 0;
+        bool Captured_;
+        int PlayerId_;
+        int ShipCount_;
+        int Level_;
+        int Armor_;
     };
 
     std::vector<TPlanetInfo> PlanetInfos_;
     std::vector<TShipMove> ShipMoves_;
 };
 
-#endif //AURALUX_GAME_STATE_H
+#endif // AURALUX_GAME_STATE_H

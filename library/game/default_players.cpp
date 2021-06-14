@@ -8,8 +8,9 @@ void TAFKPlayer::SendGameInfo(const TGameInfo& gameInfo) {
     (void)gameInfo;
 }
 
-TPlayerMove TAFKPlayer::GetMove(const TGameState& gameState) {
+TPlayerMove TAFKPlayer::GetMove(const TGameState& gameState, const TLastShipMoves& lastShipMoves) {
     (void)gameState;
+    (void)lastShipMoves;
 
     TPlayerMove playerMove;
     return playerMove;

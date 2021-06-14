@@ -14,7 +14,7 @@ public:
     using IPlayer::IPlayer;
 
     void SendGameInfo(const TGameInfo& gameInfo) override;
-    TPlayerMove GetMove(const TGameState& gameInfo) override;
+    TPlayerMove GetMove(const TGameState& gameInfo, const TLastShipMoves& lastShipMoves) override;
 
 protected:
     virtual std::string ReadLine() = 0;
@@ -22,7 +22,7 @@ protected:
 
 private:
     void WriteGameInfo(const TGameInfo& gameInfo);
-    void WriteGameState(const TGameState& gameState);
+    void WriteGameState(const TGameState& gameState, const TLastShipMoves& lastShipMoves);
     TPlayerMove ReadPlayerMove();
 };
 
