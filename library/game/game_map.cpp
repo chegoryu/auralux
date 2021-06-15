@@ -16,20 +16,19 @@ TGameMap LoadPlanarGraph(std::function<int()> readInt) {
         gameMap.StartPlanets_.push_back(readInt());
     }
 
-    std::vector<std::pair<int, int>> coords;
+    gameMap.Points_ = std::vector<TGameMap::TPoint>();
+    gameMap.Points_->resize(planetCount);
     for (int i = 0; i < planetCount; ++i) {
-        std::pair<int, int> coord;
-        coord.first = readInt();
-        coord.second = readInt();
-        coords.push_back(coord);
+        gameMap.Points_->at(i).x = readInt();
+        gameMap.Points_->at(i).y = readInt();
     }
 
     gameMap.Dists_.resize(planetCount, std::vector<int>(planetCount, 0));
 
     for (int i = 0; i < planetCount; ++i) {
         for (int j = i + 1; j < planetCount; ++j) {
-            long long int dx = coords[i].first - coords[j].first;
-            long long int dy = coords[i].second - coords[j].second;
+            long long int dx = gameMap.Points_->at(i).x - gameMap.Points_->at(j).x;
+            long long int dy = gameMap.Points_->at(i).y - gameMap.Points_->at(j).y;
             long long int sqDist = dx * dx + dy * dy;
             int dist = std::round(sqrtl(sqDist));
             assert(dist > 0);

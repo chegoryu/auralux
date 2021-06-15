@@ -33,11 +33,13 @@ set(LIBRARY_GAME
     library/game/game_result.h
     library/game/game_state.cpp
     library/game/game_state.h
+    library/game/game_visualizer.cpp
+    library/game/game_visualizer.h
     library/game/player.cpp
     library/game/player.h
     library/game/text_player.cpp
     library/game/text_player.h
- )
+)
 set(LIBRARY_TESTLIB library/testlib/testlib.h)
 
 configure_file(${CMAKE_SOURCE_DIR}/library/maps/small_map.txt ${CMAKE_CURRENT_BINARY_DIR})

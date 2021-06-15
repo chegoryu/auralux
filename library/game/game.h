@@ -41,6 +41,7 @@ public:
     void AddPlayer(std::unique_ptr<IPlayer> player);
     void Process();
 
+    [[nodiscard]] const TConfig GetGameConfg() const;
     [[nodiscard]] const TGameLogger& GetGameLogger() const;
 
 private:

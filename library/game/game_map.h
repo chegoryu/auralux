@@ -6,11 +6,21 @@
 #define AURALUX_GAME_MAP_H
 
 #include <functional>
+#include <optional>
 #include <vector>
 
 struct TGameMap {
+    struct TPoint {
+        int x;
+        int y;
+    };
+
     std::vector<int> StartPlanets_;
     std::vector<std::vector<int>> Dists_;
+
+    // May be missing
+    // Helper for planar graphs
+    std::optional<std::vector<TPoint>> Points_ = {};
 };
 
 TGameMap LoadPlanarGraph(std::function<int()> readInt);

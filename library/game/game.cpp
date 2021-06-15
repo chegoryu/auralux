@@ -8,7 +8,7 @@
 
 TGame::TGame(const TConfig& config)
     : Config_(config)
-    , GameLogger_(false)
+    , GameLogger_(true)
 {
     assert(Config_.ShipsToUpgradePlanet_.size() + 1 == Config_.PerLevelPlanetArmor_.size());
 
@@ -56,7 +56,11 @@ void TGame::Process() {
         }
     }
 
-    GameLogger_.LogFinalState(GameState_);
+    GameLogger_.LogFinalGameState(GameState_);
+}
+
+const TGame::TConfig TGame::GetGameConfg() const {
+    return Config_;
 }
 
 const TGameLogger& TGame::GetGameLogger() const {
@@ -89,7 +93,7 @@ bool TGame::Step() {
             DisqualifyPlayer(i, "failed to do player move: " + std::string(e.what()));
         }
 
-        GameLogger_.LogGameState(GameState_);
+        GameLogger_.LogGameTurn(GameState_, LastShipMovesByPlayer_.at(i - 1));
 
         if (GameState_.AlivePlayers_.size() <= 1) {
             return false;

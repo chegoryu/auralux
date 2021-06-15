@@ -6,20 +6,25 @@
 
 #include <sstream>
 
-TGameLogger::TGameLogger(bool logAllGameStates)
-    : LogAllGameStates_(logAllGameStates)
+TGameLogger::TGameLogger(bool logPlanetInfoOnly)
+    : LogPlanetInfoOnly_(logPlanetInfoOnly)
 {}
 
-void TGameLogger::LogGameState(const TGameState& gameState) {
-    if (LogAllGameStates_) {
-        GameStates_.push_back(gameState);
+void TGameLogger::LogGameTurn(const TGameState& gameState, const TLastShipMoves& lastShipMoves) {
+    TGameTurn gameTurn;
+
+    if (LogPlanetInfoOnly_) {
+        gameTurn.GameState_.PlanetInfos_ = gameState.PlanetInfos_;
     } else {
-        // Empty record to count steps and turns
-        GameStates_.push_back({});
+        gameTurn.GameState_ = gameState;
     }
+
+    gameTurn.LastShipMoves_ = lastShipMoves;
+
+    GameTurns_.push_back(gameTurn);
 }
 
-void TGameLogger::LogFinalState(const TGameState& gameState) {
+void TGameLogger::LogFinalGameState(const TGameState& gameState) {
     FinalGameState_ = gameState;
 }
 
@@ -44,8 +49,8 @@ void TGameLogger::LogDisqualifyPlayer(int playerId, const std::string& reason) {
     LogError(ss.str());
 }
 
-const std::vector<TGameState>& TGameLogger::GetGameStates() const {
-    return GameStates_;
+const std::vector<TGameLogger::TGameTurn>& TGameLogger::GetGameTurns() const {
+    return GameTurns_;
 }
 
 const TGameState& TGameLogger::GetFinalGameState() const {

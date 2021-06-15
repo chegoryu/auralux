@@ -13,23 +13,29 @@
 
 class TGameLogger {
 public:
-    TGameLogger(bool logGameAllStates);
+    struct TGameTurn {
+        TGameState GameState_;
+        TLastShipMoves LastShipMoves_;
+    };
 
-    void LogGameState(const TGameState& gameState);
-    void LogFinalState(const TGameState& gameState);
+public:
+    TGameLogger(bool logPlanetInfoOnly);
+
+    void LogGameTurn(const TGameState& gameState, const TLastShipMoves& lastShipMoves);
+    void LogFinalGameState(const TGameState& gameState);
     void LogError(const std::string& error);
 
     void LogInvalidMove(int playerId, const TPlayerMove::TShipMove& shipMove, const std::string& reason);
     void LogDisqualifyPlayer(int playerId, const std::string& reason);
 
-    const std::vector<TGameState>& GetGameStates() const;
+    const std::vector<TGameTurn>& GetGameTurns() const;
     const TGameState& GetFinalGameState() const;
     const std::vector<std::string>& GetErrors() const;
 
 private:
-    bool LogAllGameStates_;
+    const bool LogPlanetInfoOnly_;
 
-    std::vector<TGameState> GameStates_;
+    std::vector<TGameTurn> GameTurns_;
     TGameState FinalGameState_;
     std::vector<std::string> Errors_;
 };

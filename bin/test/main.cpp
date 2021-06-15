@@ -1,6 +1,8 @@
 #include "library/game/game.h"
 #include "library/game/game_map.h"
 #include "library/game/game_result.h"
+#include "library/game/game_visualizer.h"
+
 #include "library/game/default_players.h"
 
 #include <fstream>
@@ -56,6 +58,11 @@ int main(int argc, char *argv[]) {
 
     PrintHumanReadableGameResult(std::cout, GetGameResult(game.GetGameLogger()));
     PrintGameState(std::cout, game.GetGameLogger().GetFinalGameState());
+
+    {
+        std::ofstream stream("visualizer_log.txt");
+        PrintGameLogInVisualizerFormat(stream, game.GetGameConfg().GameMap_, game.GetGameLogger());
+    }
 
     std::cerr << "Total time: " << (clock() - startTime) / static_cast<double>(CLOCKS_PER_SEC) << std::endl;
 

@@ -58,8 +58,8 @@ TGameResult GetGameResult(const TGameLogger& gameLogger) {
     );
     gameResult.PlanetCount_ = static_cast<int>(finalGameState.PlanetInfos_.size());
 
-    gameResult.FullSteps_ = static_cast<int>(gameLogger.GetGameStates().size() / gameResult.PlayerCount_);
-    gameResult.TurnsInLastStep_ = static_cast<int>(gameLogger.GetGameStates().size() % gameResult.PlayerCount_);
+    gameResult.FullSteps_ = static_cast<int>(gameLogger.GetGameTurns().size() / gameResult.PlayerCount_);
+    gameResult.TurnsInLastStep_ = static_cast<int>(gameLogger.GetGameTurns().size() % gameResult.PlayerCount_);
     if (gameResult.TurnsInLastStep_ == 0) {
         gameResult.TurnsInLastStep_ = gameResult.PlayerCount_;
     }
