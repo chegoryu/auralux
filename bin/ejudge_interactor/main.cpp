@@ -6,6 +6,7 @@
 
 #include "library/game/game.h"
 #include "library/game/game_map.h"
+#include "library/game/game_result.h"
 #include "library/game/default_players.h"
 
 class TEjudgePlayer : public TTextPlayer {
@@ -62,25 +63,22 @@ int main(int argc, char *argv[]) {
     game.Process();
 
     const auto& gameLogger = game.GetGameLogger();
-
     const auto& errors = gameLogger.GetErrors();
     const auto& finalGameState = gameLogger.GetFinalGameState();
+    const auto gameResult = GetGameResult(gameLogger);
 
+    PrintHumanReadableGameResult(tout, gameResult);
     PrintGameState(tout, finalGameState);
     for (const auto& error : errors) {
         tout << error << std::endl;
     }
 
-    if (finalGameState.AlivePlayers_.size() > 1) {
-        quitf(_wa, "No winner (too many alive players)");
+    if (gameResult.Result_ != TGameResult::EResult::ONE_WINNER) {
+        quitf(_wa, "Game result is '%s' but must be one winner", (gameResult.Result_ == TGameResult::EResult::NO_WINNER ? "no winner" : "draw"));
     }
-    if (finalGameState.AlivePlayers_.empty()) {
-        quitf(_wa, "No winner (all players are not alive)");
-    }
-    int winner = *finalGameState.AlivePlayers_.begin();
 
-    if (winner - 1 != ejudgePlayerId) {
-        quitf(_wa, "Winner is %d, but ejudge player id is %d", winner, ejudgePlayerId + 1);
+    if (gameResult.WinnerId_ != ejudgePlayerId + 1) {
+        quitf(_wa, "Winner is %d, but ejudge player id is %d", gameResult.WinnerId_, ejudgePlayerId + 1);
     }
 
     if (!errors.empty()) {
