@@ -82,9 +82,9 @@ void TAggressiveExpansionPlayer::SendGameInfo(const TGameInfo& gameInfo) {
             std::shuffle(PlanetOrder_.begin(), PlanetOrder_.end(), rng);
         }
         case EGameStyle::NEAREST: {
-            int startPlanet = gameInfo.GameMap_.StartPlanets_[PlayerId_ - 1] - 1;
+            int startPlanet = gameInfo.GameMap_.StartPlanets_.at(PlayerId_ - 1) - 1;
             std::sort(PlanetOrder_.begin(), PlanetOrder_.end(), [&startPlanet, &gameInfo](int a, int b) {
-                return gameInfo.GameMap_.Dists_[startPlanet][a] < gameInfo.GameMap_.Dists_[startPlanet][b];
+                return gameInfo.GameMap_.Dists_.at(startPlanet).at(a) < gameInfo.GameMap_.Dists_.at(startPlanet).at(b);
             });
         }
     }
