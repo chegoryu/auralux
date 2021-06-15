@@ -64,6 +64,10 @@ TPlayerMove TUpgradeAndRepairMainPlayer::GetMove(const TGameState& gameState, co
     return playerMove;
 }
 
+TAggressiveExpansionPlayer::TAggressiveExpansionPlayer(EGameStyle gameStyle)
+    : GameStyle_(gameStyle)
+{}
+
 void TAggressiveExpansionPlayer::SendGameInfo(const TGameInfo& gameInfo) {
     PlayerId_ = gameInfo.PlayerId_;
     PlanetOrder_.resize(gameInfo.GameMap_.Dists_.size());
@@ -71,9 +75,19 @@ void TAggressiveExpansionPlayer::SendGameInfo(const TGameInfo& gameInfo) {
         PlanetOrder_[i] = i;
     }
 
-    std::mt19937 rng;
-    rng.seed(PlayerId_ + PlanetOrder_.size());
-    std::shuffle(PlanetOrder_.begin(), PlanetOrder_.end(), rng);
+    switch (GameStyle_) {
+        case EGameStyle::RANDOM: {
+            std::mt19937 rng;
+            rng.seed(PlayerId_ + PlanetOrder_.size());
+            std::shuffle(PlanetOrder_.begin(), PlanetOrder_.end(), rng);
+        }
+        case EGameStyle::NEAREST: {
+            int startPlanet = gameInfo.GameMap_.StartPlanets_[PlayerId_ - 1] - 1;
+            std::sort(PlanetOrder_.begin(), PlanetOrder_.end(), [&startPlanet, &gameInfo](int a, int b) {
+                return gameInfo.GameMap_.Dists_[startPlanet][a] < gameInfo.GameMap_.Dists_[startPlanet][b];
+            });
+        }
+    }
 }
 
 TPlayerMove TAggressiveExpansionPlayer::GetMove(const TGameState& gameState, const TLastShipMoves& lastShipMoves) {

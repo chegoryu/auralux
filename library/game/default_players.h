@@ -40,7 +40,13 @@ private:
 
 class TAggressiveExpansionPlayer : public IPlayer {
 public:
-    using IPlayer::IPlayer;
+    enum EGameStyle {
+        RANDOM = 0,
+        NEAREST = 1,
+    };
+
+public:
+    TAggressiveExpansionPlayer(EGameStyle gameStyle = EGameStyle::RANDOM);
 
     void SendGameInfo(const TGameInfo& gameInfo) override;
     TPlayerMove GetMove(const TGameState& gameState, const TLastShipMoves& lastShipMoves) override;
@@ -53,6 +59,7 @@ private:
     static constexpr int MIN_SHIPS_TO_MOVE = 100;
     static constexpr int MIN_ARMOR_TO_REPAIR[] = {0, 75, 150, 225};
 
+    EGameStyle GameStyle_;
     std::vector<int> PlanetOrder_;
     int PlayerId_;
 };

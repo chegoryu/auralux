@@ -37,9 +37,9 @@ TGame GetBigGame() {
 
     TGame game(config);
 
-    game.AddPlayer(std::make_unique<TUpgradeAndRepairMainPlayer>());
-    game.AddPlayer(std::make_unique<TDisqualifyPlayer>());
-    game.AddPlayer(std::make_unique<TAggressiveExpansionPlayer>());
+    game.AddPlayer(std::make_unique<TAggressiveExpansionPlayer>(TAggressiveExpansionPlayer::EGameStyle::NEAREST));
+    game.AddPlayer(std::make_unique<TAggressiveExpansionPlayer>(TAggressiveExpansionPlayer::EGameStyle::NEAREST));
+    game.AddPlayer(std::make_unique<TAggressiveExpansionPlayer>(TAggressiveExpansionPlayer::EGameStyle::NEAREST));
     game.AddPlayer(std::make_unique<TAFKPlayer>());
 
     return std::move(game);
