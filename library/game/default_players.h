@@ -83,5 +83,6 @@ protected:
 };
 
 std::unique_ptr<IPlayer> CreateDefaultPlayer(const std::string& playerType);
+bool HasDefaultPlayer(const std::string& playerType);
 
 #endif // AURALUX_DEFAULT_PLAYERS_H

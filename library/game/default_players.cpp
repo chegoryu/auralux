@@ -184,3 +184,14 @@ std::unique_ptr<IPlayer> CreateDefaultPlayer(const std::string& playerType) {
         return nullptr;
     }
 }
+
+bool HasDefaultPlayer(const std::string& playerType) {
+    static std::set<std::string> defaultPlayers = {
+        "afk",
+        "upgrade_and_repair_main",
+        "aggressive_expansion_random",
+        "aggressive_expansion_nearest",
+    };
+
+    return defaultPlayers.find(playerType) != defaultPlayers.end();
+}

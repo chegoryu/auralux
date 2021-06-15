@@ -1,0 +1,12 @@
+MAP symmetrical_big_map.txt
+
+PLAYER DEFAULT afk
+PLAYER DEFAULT upgrade_and_repair_main
+PLAYER DEFAULT upgrade_and_repair_main
+PLAYER DEFAULT aggressive_expansion_nearest
+
+MAX_STEPS 20000
+
+LOG_DIR logs_v2
+
+
