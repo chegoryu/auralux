@@ -30,14 +30,8 @@ std::pair<std::vector<std::unique_ptr<IPlayer>>, int> ReadPlayers(const TGame::T
     for (size_t i = 0; i < gameConfig.GameMap_.StartPlanets_.size(); ++i) {
         std::string playerType = inf.readToken();
 
-        if (playerType == "afk") {
-            players.push_back(std::make_unique<TAFKPlayer>());
-        } else if (playerType == "upgrade_and_repair_main") {
-            players.push_back(std::make_unique<TUpgradeAndRepairMainPlayer>());
-        } else if (playerType == "aggressive_expansion_random") {
-            players.push_back(std::make_unique<TAggressiveExpansionPlayer>(TAggressiveExpansionPlayer::EGameStyle::RANDOM));
-        } else if (playerType == "aggressive_expansion_nearest") {
-            players.push_back(std::make_unique<TAggressiveExpansionPlayer>(TAggressiveExpansionPlayer::EGameStyle::NEAREST));
+        if (auto defaultPlayer = CreateDefaultPlayer(playerType)) {
+            players.push_back(std::move(defaultPlayer));
         } else if (playerType == "ejudge") {
             assert(ejudgePlayerId == -1);
             ejudgePlayerId = static_cast<int>(i);

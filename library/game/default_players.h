@@ -8,6 +8,8 @@
 #include "player.h"
 #include "text_player.h"
 
+#include <memory>
+
 class TAutoGameOverPlayer : public IPlayer {
 public:
     using IPlayer::IPlayer;
@@ -79,5 +81,7 @@ protected:
     std::string ReadLine() override;
     void WriteLine(const std::string& line) override;
 };
+
+std::unique_ptr<IPlayer> CreateDefaultPlayer(const std::string& playerType);
 
 #endif // AURALUX_DEFAULT_PLAYERS_H

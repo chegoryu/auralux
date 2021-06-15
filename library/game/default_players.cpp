@@ -170,3 +170,17 @@ std::string TStdinStdoutPlayer::ReadLine() {
 void TStdinStdoutPlayer::WriteLine(const std::string& line) {
     std::cout << line << std::endl;
 }
+
+std::unique_ptr<IPlayer> CreateDefaultPlayer(const std::string& playerType) {
+    if (playerType == "afk") {
+        return std::make_unique<TAFKPlayer>();
+    } else if (playerType == "upgrade_and_repair_main") {
+        return std::make_unique<TUpgradeAndRepairMainPlayer>();
+    } else if (playerType == "aggressive_expansion_random") {
+        return std::make_unique<TAggressiveExpansionPlayer>(TAggressiveExpansionPlayer::EGameStyle::RANDOM);
+    } else if (playerType == "aggressive_expansion_nearest") {
+        return std::make_unique<TAggressiveExpansionPlayer>(TAggressiveExpansionPlayer::EGameStyle::NEAREST);
+    } else {
+        return nullptr;
+    }
+}

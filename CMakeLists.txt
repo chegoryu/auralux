@@ -61,4 +61,4 @@ add_executable(ejudge_interactor bin/ejudge_interactor/main.cpp ${LIBRARY_GAME} 
 
 # Game runner
 add_executable(game_runner bin/game_runner/main.cpp ${LIBRARY_GAME})
-target_link_libraries(test ${REQUIRED_LIBS_QUALIFIED})
+target_link_libraries(game_runner ${REQUIRED_LIBS_QUALIFIED})
