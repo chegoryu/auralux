@@ -63,7 +63,7 @@ void TTextPlayer::WriteGameState(const TGameState& gameState, const TLastShipMov
             << shipMove.FromPlanetId_ << " "
             << shipMove.ToPlanetId_ << " "
             << shipMove.Count_;
-        
+
         WriteLine(ss.str());
     }
 
