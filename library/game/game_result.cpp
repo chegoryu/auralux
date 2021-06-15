@@ -23,14 +23,14 @@ std::string GameResultEResultToString(TGameResult::EResult result) {
 template<typename T>
 void PrintContainer(std::ostream& stream, const T& container) {
     if (container.empty()) {
-        stream << "empty" << std::endl;
+        stream << "empty" << '\n';
     } else {
         bool isFirst = true;
         for (const auto id : container) {
             stream << (isFirst ? "" : " ") << id;
             isFirst = false;
         }
-        stream << std::endl;
+        stream << '\n';
     }
 }
 
@@ -124,17 +124,17 @@ TGameResult GetGameResult(const TGameLogger& gameLogger) {
 }
 
 void PrintHumanReadableGameResult(std::ostream& stream, const TGameResult& gameResult) {
-    stream << "Game result: " << GameResultEResultToString(gameResult.Result_) << std::endl;
-    stream << "Winner id: " << gameResult.WinnerId_ << std::endl;
+    stream << "Game result: " << GameResultEResultToString(gameResult.Result_) << '\n';
+    stream << "Winner id: " << gameResult.WinnerId_ << '\n';
 
-    stream << "Player count: " << gameResult.PlayerCount_ << std::endl;
-    stream << "Planet count: " << gameResult.PlanetCount_ << std::endl;
+    stream << "Player count: " << gameResult.PlayerCount_ << '\n';
+    stream << "Planet count: " << gameResult.PlanetCount_ << '\n';
 
-    stream << "Full steps: " << gameResult.FullSteps_ << std::endl;
-    stream << "Turns in last step: " << gameResult.TurnsInLastStep_ << std::endl;
+    stream << "Full steps: " << gameResult.FullSteps_ << '\n';
+    stream << "Turns in last step: " << gameResult.TurnsInLastStep_ << '\n';
 
-    stream << "Ship count: " << gameResult.ShipCount_ << std::endl;
-    stream << "Non disqualified players ship count: " << gameResult.NonDisqualifiedPlayersShipCount_ << std::endl;
+    stream << "Ship count: " << gameResult.ShipCount_ << '\n';
+    stream << "Non disqualified players ship count: " << gameResult.NonDisqualifiedPlayersShipCount_ << '\n';
 
     stream << "Player planet counts list: ";
     PrintContainer(stream, gameResult.PlayerPlanetCounts_);

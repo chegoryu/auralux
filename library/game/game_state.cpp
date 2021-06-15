@@ -10,13 +10,13 @@ namespace {
 
 template<typename T>
 void PrintContainer(std::ostream& stream, const T& container) {
-    stream << container.size() << std::endl;
+    stream << container.size() << '\n';
     bool isFirst = true;
     for (const auto id : container) {
         stream << (isFirst ? "" : " ") << id;
         isFirst = false;
     }
-    stream << std::endl;
+    stream << '\n';
 }
 
 } // namespace
@@ -28,19 +28,19 @@ void PrintGameState(std::ostream& stream, const TGameState& gameState) {
                 << planetInfo.PlayerId_ << " "
                 << planetInfo.ShipCount_ << " "
                 << planetInfo.Level_ << " "
-                << planetInfo.Armor_ << std::endl;
+                << planetInfo.Armor_ << '\n';
         }
     }
 
     {
-        stream << gameState.ShipGropus_.size() << std::endl;
+        stream << gameState.ShipGropus_.size() << '\n';
         for (const auto& shipGroup : gameState.ShipGropus_) {
             stream
                 << shipGroup.PlayerId_ << " "
                 << shipGroup.FromPlanetId_ << " "
                 << shipGroup.ToPlanetId_ << " "
                 << shipGroup.Count_ << " "
-                << shipGroup.TimeToDestination_ << std::endl;
+                << shipGroup.TimeToDestination_ << '\n';
         }
     }
 

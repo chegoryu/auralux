@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 
     auto errors = game.GetGameLogger().GetErrors();
     for (const auto& error : errors) {
-        std::cout << error << std::endl;
+        std::cout << error << '\n';
     }
 
     PrintHumanReadableGameResult(std::cout, GetGameResult(game.GetGameLogger()));
@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
         PrintGameLogInVisualizerFormat(stream, game.GetGameConfg().GameMap_, game.GetGameLogger());
     }
 
-    std::cerr << "Total time: " << (clock() - startTime) / static_cast<double>(CLOCKS_PER_SEC) << std::endl;
+    std::cerr << "Total time: " << (clock() - startTime) / static_cast<double>(CLOCKS_PER_SEC) << '\n';
 
     return 0;
 }

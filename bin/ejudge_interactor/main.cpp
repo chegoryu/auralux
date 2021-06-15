@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
     PrintHumanReadableGameResult(tout, gameResult);
     PrintGameState(tout, finalGameState);
     for (const auto& error : errors) {
-        tout << error << std::endl;
+        tout << error << '\n';
     }
 
     if (gameResult.Result_ != TGameResult::EResult::ONE_WINNER) {

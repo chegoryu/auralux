@@ -7,19 +7,19 @@
 void PrintGameLogInVisualizerFormat(std::ostream& stream, const TGameMap& gameMap, const TGameLogger& gameLogger) {
     assert(gameMap.Points_);
 
-    stream << gameMap.Points_->size() << std::endl;
+    stream << gameMap.Points_->size() << '\n';
     for (const auto& point : *gameMap.Points_) {
-        stream << point.x << " " << point.y << std::endl;
+        stream << point.x << " " << point.y << '\n';
     }
 
     for (const auto& gameTurn : gameLogger.GetGameTurns()) {
-        stream << gameTurn.LastShipMoves_.ShipMoves_.size() << std::endl;
+        stream << gameTurn.LastShipMoves_.ShipMoves_.size() << '\n';
         for (const auto& shipMove : gameTurn.LastShipMoves_.ShipMoves_) {
             stream
                 << shipMove.PlayerId_ << " "
                 << shipMove.FromPlanetId_ << " "
                 << shipMove.ToPlanetId_ << " "
-                << shipMove.Count_ << std::endl;
+                << shipMove.Count_ << '\n';
         }
 
         for (const auto& planetInfo : gameTurn.GameState_.PlanetInfos_) {
@@ -27,9 +27,9 @@ void PrintGameLogInVisualizerFormat(std::ostream& stream, const TGameMap& gameMa
                 << planetInfo.PlayerId_ << " "
                 << planetInfo.ShipCount_ << " "
                 << planetInfo.Level_ << " "
-                << planetInfo.Armor_ << std::endl;
+                << planetInfo.Armor_ << '\n';
         }
     }
 
-    stream << -1 << std::endl;
+    stream << -1 << '\n';
 }
