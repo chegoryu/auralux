@@ -6,29 +6,6 @@
 
 #include <sstream>
 
-
-
-/*
-    PER MOVE INFO START
-
-    <PlanetCount lines>
-    PlayerId ShipCount Level Armor
-
-    <number of moves>
-    PlayerId FromPlanetId ToPlanetId Count
-
-    PER MOVE INFO END
-*/
-
-/*
-    PLAYER MOVE BEGIN
-
-    <number of moves>
-    FromPlanetId ToPlanetId Count
-
-    PLAYER MOVE END
-*/
-
 TTextPlayer::TTextPlayer(int maxPlayerMovesPerReadMove)
     : MaxPlayerMovesPerReadMove_(maxPlayerMovesPerReadMove)
 {}
@@ -86,6 +63,7 @@ void TTextPlayer::WriteGameState(const TGameState& gameState, const TLastShipMov
             << shipMove.FromPlanetId_ << " "
             << shipMove.ToPlanetId_ << " "
             << shipMove.Count_;
+        WriteLine(ss.str());
     }
 
     for (const auto& planetInfo : gameState.PlanetInfos_) {
