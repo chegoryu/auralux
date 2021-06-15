@@ -16,7 +16,12 @@ public:
     using TTextPlayer::TTextPlayer;
 
     std::string ReadLine() override {
-        return ouf.readLine();
+        std::string line;
+        do {
+            line = ouf.readLine();
+        } while (line.empty());
+
+        return line;
     }
     void WriteLine(const std::string& line) override {
         std::cout << line << std::endl;
