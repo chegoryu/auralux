@@ -7,11 +7,11 @@
 #include <sstream>
 
 TGameLogger::TGameLogger(bool logAllGameStates)
-    : LogAllGamesStates_(logAllGameStates)
+    : LogAllGameStates_(logAllGameStates)
 {}
 
 void TGameLogger::LogGameState(const TGameState& gameState) {
-    if (LogAllGamesStates_) {
+    if (LogAllGameStates_) {
         GameStates_.push_back(gameState);
     } else {
         // Empty record to count steps and turns

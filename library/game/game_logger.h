@@ -27,7 +27,7 @@ public:
     const std::vector<std::string>& GetErrors() const;
 
 private:
-    bool LogAllGamesStates_;
+    bool LogAllGameStates_;
 
     std::vector<TGameState> GameStates_;
     TGameState FinalGameState_;
