@@ -110,9 +110,10 @@ TPlayerMove TTextPlayer::ReadPlayerMove() {
 
     int moveCount = 0;
     {
-        std::stringstream ss(ReadLine());
+        std::string currentLine = ReadLine();
+        std::stringstream ss(currentLine);
         if (!(ss >> moveCount)) {
-            return DisqualifyMe("Failed to read move count");
+            return DisqualifyMe("Failed to read move count from '" + currentLine + "'");
         }
     }
 
@@ -121,11 +122,12 @@ TPlayerMove TTextPlayer::ReadPlayerMove() {
     }
 
     for (int i = 0; i < moveCount; ++i) {
-        std::stringstream ss(ReadLine());
+        std::string currentLine = ReadLine();
+        std::stringstream ss(currentLine));
 
         TPlayerMove::TShipMove shipMove;
         if (!(ss >> shipMove.FromPlanetId_) || !(ss >> shipMove.ToPlanetId_) || !(ss >> shipMove.Count_)) {
-            return DisqualifyMe("Failed to read ship move");
+            return DisqualifyMe("Failed to read ship move from '" + currentLine + "'");
         }
 
         playerMove.ShipMoves_.push_back(shipMove);
