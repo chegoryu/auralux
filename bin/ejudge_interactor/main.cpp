@@ -9,6 +9,8 @@
 #include "library/game/game_result.h"
 #include "library/game/default_players.h"
 
+#include <cassert>
+
 class TEjudgePlayer : public TTextPlayer {
 public:
     using TTextPlayer::TTextPlayer;

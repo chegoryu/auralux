@@ -4,6 +4,7 @@
 
 #include "game_map.h"
 
+#include <cassert>
 #include <cmath>
 
 TGameMap LoadPlanarGraph(std::function<int()> readInt) {

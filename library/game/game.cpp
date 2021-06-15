@@ -4,6 +4,7 @@
 
 #include "game.h"
 
+#include <cassert>
 #include <set>
 
 TGame::TGame(const TConfig& config)

@@ -4,6 +4,8 @@
 
 #include "game_visualizer.h"
 
+#include <cassert>
+
 void PrintGameLogInVisualizerFormat(std::ostream& stream, const TGameMap& gameMap, const TGameLogger& gameLogger) {
     assert(gameMap.Points_);
 
