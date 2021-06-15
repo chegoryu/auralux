@@ -4,6 +4,8 @@
 
 #include "game_result.h"
 
+#include <cassert>
+
 namespace {
 
 std::string GameResultEResultToString(TGameResult::EResult result) {
