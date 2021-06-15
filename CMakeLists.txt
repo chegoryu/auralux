@@ -21,21 +21,23 @@ find_package(Qt${QT_VERSION} COMPONENTS ${REQUIRED_LIBS} REQUIRED)
 include_directories(.)
 
 set(LIBRARY_GAME
-        library/game/default_players.cpp
-        library/game/default_players.h
-        library/game/game.cpp
-        library/game/game.h
-        library/game/game_logger.cpp
-        library/game/game_logger.h
-        library/game/game_map.cpp
-        library/game/game_map.h
-        library/game/game_state.cpp
-        library/game/game_state.h
-        library/game/player.cpp
-        library/game/player.h
-        library/game/text_player.cpp
-        library/game/text_player.h
-)
+    library/game/default_players.cpp
+    library/game/default_players.h
+    library/game/game.cpp
+    library/game/game.h
+    library/game/game_logger.cpp
+    library/game/game_logger.h
+    library/game/game_map.cpp
+    library/game/game_map.h
+    library/game/game_result.cpp
+    library/game/game_result.h
+    library/game/game_state.cpp
+    library/game/game_state.h
+    library/game/player.cpp
+    library/game/player.h
+    library/game/text_player.cpp
+    library/game/text_player.h
+ )
 set(LIBRARY_TESTLIB library/testlib/testlib.h)
 
 configure_file(${CMAKE_SOURCE_DIR}/library/maps/small_map.txt ${CMAKE_CURRENT_BINARY_DIR})

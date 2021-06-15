@@ -8,6 +8,7 @@
 
 TGame::TGame(const TConfig& config)
     : Config_(config)
+    , GameLogger_(false)
 {
     assert(Config_.ShipsToUpgradePlanet_.size() + 1 == Config_.PerLevelPlanetArmor_.size());
 

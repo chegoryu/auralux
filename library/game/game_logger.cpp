@@ -6,11 +6,17 @@
 
 #include <sstream>
 
-TGameLogger::TGameLogger() {
-}
+TGameLogger::TGameLogger(bool logAllGameStates)
+    : LogAllGamesStates_(logAllGameStates)
+{}
 
 void TGameLogger::LogGameState(const TGameState& gameState) {
-    GameStates_.push_back(gameState);
+    if (LogAllGamesStates_) {
+        GameStates_.push_back(gameState);
+    } else {
+        // Empty record to count steps and turns
+        GameStates_.push_back({});
+    }
 }
 
 void TGameLogger::LogFinalState(const TGameState& gameState) {
@@ -38,7 +44,7 @@ void TGameLogger::LogDisqualifyPlayer(int playerId, const std::string& reason) {
     LogError(ss.str());
 }
 
-const std::vector<TGameState> TGameLogger::GetGameStates() const {
+const std::vector<TGameState>& TGameLogger::GetGameStates() const {
     return GameStates_;
 }
 
@@ -46,6 +52,6 @@ const TGameState& TGameLogger::GetFinalGameState() const {
     return FinalGameState_;
 }
 
-const std::vector<std::string> TGameLogger::GetErrors() const {
+const std::vector<std::string>& TGameLogger::GetErrors() const {
     return Errors_;
 }

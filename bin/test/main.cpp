@@ -1,5 +1,6 @@
 #include "library/game/game.h"
 #include "library/game/game_map.h"
+#include "library/game/game_result.h"
 #include "library/game/default_players.h"
 
 #include <fstream>
@@ -34,10 +35,10 @@ TGame GetBigGame() {
 
     TGame game(config);
 
-    game.AddPlayer(std::make_unique<TAggressiveExpansionPlayer>());
+    game.AddPlayer(std::make_unique<TUpgradeAndRepairMainPlayer>());
     game.AddPlayer(std::make_unique<TDisqualifyPlayer>());
     game.AddPlayer(std::make_unique<TUpgradeAndRepairMainPlayer>());
-    game.AddPlayer(std::make_unique<TAggressiveExpansionPlayer>());
+    game.AddPlayer(std::make_unique<TAFKPlayer>());
 
     return std::move(game);
 }
@@ -53,9 +54,10 @@ int main(int argc, char *argv[]) {
         std::cout << error << std::endl;
     }
 
+    PrintHumanReadableGameResult(std::cout, GetGameResult(game.GetGameLogger()));
     PrintGameState(std::cout, game.GetGameLogger().GetFinalGameState());
 
-    std::cerr << "Total time: " << (clock() - startTime) / (double)CLOCKS_PER_SEC << std::endl;
+    std::cerr << "Total time: " << (clock() - startTime) / static_cast<double>(CLOCKS_PER_SEC) << std::endl;
 
     return 0;
 }

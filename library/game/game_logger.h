@@ -13,7 +13,7 @@
 
 class TGameLogger {
 public:
-    TGameLogger();
+    TGameLogger(bool logGameAllStates);
 
     void LogGameState(const TGameState& gameState);
     void LogFinalState(const TGameState& gameState);
@@ -22,11 +22,13 @@ public:
     void LogInvalidMove(int playerId, const TPlayerMove::TShipMove& shipMove, const std::string& reason);
     void LogDisqualifyPlayer(int playerId, const std::string& reason);
 
-    const std::vector<TGameState> GetGameStates() const;
+    const std::vector<TGameState>& GetGameStates() const;
     const TGameState& GetFinalGameState() const;
-    const std::vector<std::string> GetErrors() const;
+    const std::vector<std::string>& GetErrors() const;
 
 private:
+    bool LogAllGamesStates_;
+
     std::vector<TGameState> GameStates_;
     TGameState FinalGameState_;
     std::vector<std::string> Errors_;

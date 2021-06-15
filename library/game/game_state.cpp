@@ -6,6 +6,8 @@
 
 #include <sstream>
 
+namespace {
+
 template<typename T>
 void PrintContainer(std::ostream& stream, const T& container) {
     stream << container.size() << std::endl;
@@ -16,6 +18,8 @@ void PrintContainer(std::ostream& stream, const T& container) {
     }
     stream << std::endl;
 }
+
+} // namespace
 
 void PrintGameState(std::ostream& stream, const TGameState& gameState) {
     {
