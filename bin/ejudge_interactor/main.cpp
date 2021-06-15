@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
     });
     // Only 10000 moves in ejudge
     config.MaxSteps_ = 10000;
-    
+
     TGame game(config);
 
     auto [players, ejudgePlayerId] = ReadPlayers(config);
