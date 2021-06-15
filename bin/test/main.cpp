@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
 
     {
         std::ofstream stream("visualizer_log.txt");
-        PrintGameLogInVisualizerFormat(stream, game.GetGameConfg().GameMap_, game.GetGameLogger());
+        PrintGameLogInVisualizerFormat(stream, game.GetGameConfig().GameMap_, game.GetGameLogger());
     }
 
     std::cerr << "Total time: " << (clock() - startTime) / static_cast<double>(CLOCKS_PER_SEC) << '\n';

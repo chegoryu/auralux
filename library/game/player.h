@@ -39,6 +39,7 @@ public:
 
     virtual void SendGameInfo(const TGameInfo& gameInfo) = 0;
     virtual TPlayerMove GetMove(const TGameState& gameState, const TLastShipMoves& lastShipMoves) = 0;
+    virtual void SendGameOver() = 0;
 };
 
 #endif // AURALUX_PLAYER_H

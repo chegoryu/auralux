@@ -43,12 +43,13 @@ public:
     void AddPlayer(std::unique_ptr<IPlayer> player);
     void Process();
 
-    [[nodiscard]] const TConfig GetGameConfg() const;
+    [[nodiscard]] const TConfig& GetGameConfig() const;
     [[nodiscard]] const TGameLogger& GetGameLogger() const;
 
 private:
     bool Init();
     bool Step();
+    void Finish();
     void PrePlayerMove(int playerId);
     void PlayerMove(int playerId);
 

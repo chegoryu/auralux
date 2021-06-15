@@ -15,6 +15,7 @@ public:
 
     void SendGameInfo(const TGameInfo& gameInfo) override final;
     TPlayerMove GetMove(const TGameState& gameInfo, const TLastShipMoves& lastShipMoves) override final;
+    void SendGameOver() override final;
 
 protected:
     virtual std::string ReadLine() = 0;
@@ -25,6 +26,7 @@ private:
 
     void WriteGameInfo(const TGameInfo& gameInfo);
     void WriteGameState(const TGameState& gameState, const TLastShipMoves& lastShipMoves);
+    void WriteGameOver();
     TPlayerMove ReadPlayerMove();
 
 private:

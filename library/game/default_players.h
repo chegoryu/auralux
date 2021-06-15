@@ -8,17 +8,24 @@
 #include "player.h"
 #include "text_player.h"
 
-class TAFKPlayer : public IPlayer {
+class TAutoGameOverPlayer : public IPlayer {
 public:
     using IPlayer::IPlayer;
+
+    void SendGameOver() override;
+};
+
+class TAFKPlayer : public TAutoGameOverPlayer {
+public:
+    using TAutoGameOverPlayer::TAutoGameOverPlayer;
 
     void SendGameInfo(const TGameInfo& gameInfo) override;
     TPlayerMove GetMove(const TGameState& gameState, const TLastShipMoves& lastShipMoves) override;
 };
 
-class TDisqualifyPlayer : public IPlayer {
+class TDisqualifyPlayer : public TAutoGameOverPlayer  {
 public:
-    using IPlayer::IPlayer;
+    using TAutoGameOverPlayer::TAutoGameOverPlayer;
 
     void SendGameInfo(const TGameInfo& gameInfo) override;
     TPlayerMove GetMove(const TGameState& gameState, const TLastShipMoves& lastShipMoves) override;
@@ -27,9 +34,9 @@ private:
     int StepToDisqualify_ = 100;
 };
 
-class TUpgradeAndRepairMainPlayer : public IPlayer {
+class TUpgradeAndRepairMainPlayer : public TAutoGameOverPlayer {
 public:
-    using IPlayer::IPlayer;
+    using TAutoGameOverPlayer::TAutoGameOverPlayer;
 
     void SendGameInfo(const TGameInfo& gameInfo) override;
     TPlayerMove GetMove(const TGameState& gameState, const TLastShipMoves& lastShipMoves) override;
@@ -38,7 +45,7 @@ private:
     int PlayerId_;
 };
 
-class TAggressiveExpansionPlayer : public IPlayer {
+class TAggressiveExpansionPlayer : public TAutoGameOverPlayer {
 public:
     enum EGameStyle {
         RANDOM = 0,

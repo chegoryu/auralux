@@ -42,6 +42,10 @@ TPlayerMove TTextPlayer::GetMove(const TGameState& gameState, const TLastShipMov
     return ReadPlayerMove();
 }
 
+void TTextPlayer::SendGameOver() {
+    WriteGameOver();
+}
+
 TPlayerMove TTextPlayer::DisqualifyMe(const std::string& reason) const {
     TPlayerMove playerMove;
     playerMove.DisqualifyMe_ = true;
@@ -69,17 +73,6 @@ void TTextPlayer::WriteGameInfo(const TGameInfo& gameInfo) {
 }
 
 void TTextPlayer::WriteGameState(const TGameState& gameState, const TLastShipMoves& lastShipMoves) {
-    for (const auto& planetInfo : gameState.PlanetInfos_) {
-        std::stringstream ss;
-        ss
-            << planetInfo.PlayerId_ << " "
-            << planetInfo.ShipCount_ << " "
-            << planetInfo.Level_ << " "
-            << planetInfo.Armor_;
-
-        WriteLine(ss.str());
-    }
-
     {
         std::stringstream ss;
         ss << lastShipMoves.ShipMoves_.size();
@@ -94,6 +87,21 @@ void TTextPlayer::WriteGameState(const TGameState& gameState, const TLastShipMov
             << shipMove.ToPlanetId_ << " "
             << shipMove.Count_;
     }
+
+    for (const auto& planetInfo : gameState.PlanetInfos_) {
+        std::stringstream ss;
+        ss
+            << planetInfo.PlayerId_ << " "
+            << planetInfo.ShipCount_ << " "
+            << planetInfo.Level_ << " "
+            << planetInfo.Armor_;
+
+        WriteLine(ss.str());
+    }
+}
+
+void TTextPlayer::WriteGameOver() {
+    WriteLine("-1");
 }
 
 TPlayerMove TTextPlayer::ReadPlayerMove() {

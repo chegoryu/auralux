@@ -7,6 +7,9 @@
 #include <iostream>
 #include <random>
 
+void TAutoGameOverPlayer::SendGameOver() {
+}
+
 void TAFKPlayer::SendGameInfo(const TGameInfo& gameInfo) {
     (void)gameInfo;
 }

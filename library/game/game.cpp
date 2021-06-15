@@ -57,10 +57,12 @@ void TGame::Process() {
         }
     }
 
+    Finish();
+
     GameLogger_.LogFinalGameState(GameState_);
 }
 
-const TGame::TConfig TGame::GetGameConfg() const {
+const TGame::TConfig& TGame::GetGameConfig() const {
     return Config_;
 }
 
@@ -106,6 +108,16 @@ bool TGame::Step() {
     }
 
     return true;
+}
+
+void TGame::Finish() {
+    for (size_t i = 1; i <= Players_.size(); ++i) {
+        try {
+            Players_[i - 1].PlayerEngine_->SendGameOver();
+        } catch (const std::exception& e) {
+            DisqualifyPlayer(i, "failed to do send game over: " + std::string(e.what()));
+        }
+    }
 }
 
 void TGame::PrePlayerMove(int playerId) {
