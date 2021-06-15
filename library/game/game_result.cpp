@@ -18,6 +18,9 @@ std::string GameResultEResultToString(TGameResult::EResult result) {
             return "draw";
         }
     }
+
+    assert(false);
+    return "unknown";
 }
 
 template<typename T>
