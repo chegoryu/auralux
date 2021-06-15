@@ -56,6 +56,9 @@ int main(int argc, char *argv[]) {
     config.GameMap_ = LoadPlanarGraph([]() {
         return inf.readInt();
     });
+    // Only 10000 moves in ejudge
+    config.MaxSteps_ = 10000;
+    
     TGame game(config);
 
     auto [players, ejudgePlayerId] = ReadPlayers(config);

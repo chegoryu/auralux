@@ -12,7 +12,7 @@
 class TGame {
 public:
     struct TConfig {
-        int MaxSteps_ = 100000;
+        int MaxSteps_ = 10000;
 
         int StartShipsCount_ = 100;
 
