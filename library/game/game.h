@@ -9,6 +9,8 @@
 #include "game_logger.h"
 #include "player.h"
 
+#include <memory>
+
 class TGame {
 public:
     struct TConfig {
