@@ -123,7 +123,7 @@ TPlayerMove TTextPlayer::ReadPlayerMove() {
 
     for (int i = 0; i < moveCount; ++i) {
         std::string currentLine = ReadLine();
-        std::stringstream ss(currentLine));
+        std::stringstream ss(currentLine);
 
         TPlayerMove::TShipMove shipMove;
         if (!(ss >> shipMove.FromPlanetId_) || !(ss >> shipMove.ToPlanetId_) || !(ss >> shipMove.Count_)) {
