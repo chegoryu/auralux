@@ -33,13 +33,13 @@ TGame GetSmallGame() {
 
 TGame GetBigGame() {
     TGame::TConfig config;
-    config.GameMap_ = ReadMapFromFile("big_map.txt");
+    config.GameMap_ = ReadMapFromFile("symmetrical_big_map.txt");
 
     TGame game(config);
 
     game.AddPlayer(std::make_unique<TUpgradeAndRepairMainPlayer>());
     game.AddPlayer(std::make_unique<TDisqualifyPlayer>());
-    game.AddPlayer(std::make_unique<TUpgradeAndRepairMainPlayer>());
+    game.AddPlayer(std::make_unique<TAggressiveExpansionPlayer>());
     game.AddPlayer(std::make_unique<TAFKPlayer>());
 
     return std::move(game);

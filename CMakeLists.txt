@@ -42,8 +42,15 @@ set(LIBRARY_GAME
 )
 set(LIBRARY_TESTLIB library/testlib/testlib.h)
 
-configure_file(${CMAKE_SOURCE_DIR}/library/maps/small_map.txt ${CMAKE_CURRENT_BINARY_DIR})
-configure_file(${CMAKE_SOURCE_DIR}/library/maps/big_map.txt ${CMAKE_CURRENT_BINARY_DIR})
+set(GAME_MAPS
+    library/maps/small_map.txt
+    library/maps/big_map.txt
+    library/maps/symmetrical_big_map.txt
+)
+
+foreach(GAME_MAP IN LISTS GAME_MAPS)
+    configure_file(${CMAKE_SOURCE_DIR}/${GAME_MAP} ${CMAKE_CURRENT_BINARY_DIR})
+endforeach()
 
 # Test binary
 add_executable(test bin/test/main.cpp ${LIBRARY_GAME})
