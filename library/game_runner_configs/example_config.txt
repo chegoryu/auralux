@@ -8,5 +8,3 @@ PLAYER DEFAULT aggressive_expansion_nearest
 MAX_STEPS 20000
 
 LOG_DIR logs_v2
-
-

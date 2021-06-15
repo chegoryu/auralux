@@ -1,5 +1,5 @@
-20 2
-5 20
+20 4
+5 10 15 20
 9 9
 7 7
 5 5
@@ -20,4 +20,4 @@
 14 14
 16 16
 18 18
-ejudge afk
+aggressive_expansion_random upgrade_and_repair_main afk ejudge
