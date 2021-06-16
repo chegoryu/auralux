@@ -21,6 +21,8 @@ public:
     void WriteLine(const std::string& line) override {
         std::cout << line << std::endl;
     }
+    void OnTurnEnd() override {
+    }
 };
 
 std::pair<std::vector<std::unique_ptr<IPlayer>>, int> ReadPlayers(const TGame::TConfig& gameConfig) {
@@ -69,6 +71,7 @@ int main(int argc, char *argv[]) {
     const auto gameResult = GetGameResult(gameLogger);
 
     PrintHumanReadableGameResult(tout, gameResult);
+    tout << '\n';
     PrintGameState(tout, finalGameState, /* planetInfoOnly = */ true);
 
     size_t maxErrorsInOutput = 50;

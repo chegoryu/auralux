@@ -1,6 +1,8 @@
+#include <QDateTime>
 #include <QDebug>
-#include <QProcess>
 #include <QDir>
+#include <QFile>
+#include <QProcess>
 
 #include "library/game/game.h"
 #include "library/game/game_map.h"
@@ -31,6 +33,8 @@ struct TRunConfig {
     std::string LogDir_ = "logs";
     bool DisableVisualizerLog_ = false;
 
+    long long int ProcessPlayerStartTimeoutMs_ = 5000;
+    long long int ProcessPlayerFinishTimeoutMs_ = 1000;
     long long int ProcessPlayerTimeoutMs_ = 2000;
     long long int ProcessPLayerTimeoutAdditionPerTurnMs_ = 1;
 };
@@ -128,13 +132,71 @@ TRunConfig LoadRunConfig(const std::string& path) {
     return runConfig;
 }
 
-class TProcessPlayer : public TTextPlayer {
+class TIODevicePlayer : public TTextPlayer {
+public:
+    TIODevicePlayer(
+        int maxPlayerMovesPerReadMove,
+        QIODevice& ioDevice,
+        qint64 timeoutMs,
+        qint64 timeoutAdditionPerTurnMs
+    )
+        : TTextPlayer(maxPlayerMovesPerReadMove)
+        , IoDevice_(ioDevice)
+        , TimeoutMs_(timeoutMs)
+        , TimeoutAdditionPerTurnMs_(timeoutAdditionPerTurnMs)
+        , TimeLeftMs_(TimeoutMs_)
+        , Timeouted_(false)
+    {}
+
     std::string ReadLine() override {
-        return "0"; // TODO
+        if (Timeouted_) {
+            return TTextPlayer::DISQUALIFY_ME;
+        }
+
+        QDateTime startTime = QDateTime::currentDateTime();
+        QDateTime now = startTime;
+        QDateTime deadline = now.addMSecs(TimeLeftMs_);
+
+        bool readyRead = true;
+        while (!IoDevice_.canReadLine() && readyRead && now < deadline) {
+            now = QDateTime::currentDateTime();
+            readyRead = IoDevice_.waitForReadyRead(now.msecsTo(deadline));
+        }
+
+        if (!IoDevice_.canReadLine()) {
+            Timeouted_ = true;
+            return TTextPlayer::DISQUALIFY_ME;
+        }
+
+        now = QDateTime::currentDateTime();
+        qint64 timeElapsedMs = startTime.msecsTo(now);
+        if (timeElapsedMs > TimeLeftMs_) {
+            Timeouted_ = true;
+            return TTextPlayer::DISQUALIFY_ME;
+        }
+        TimeLeftMs_ -= timeElapsedMs;
+
+        return IoDevice_.readLine().data();
     }
     void WriteLine(const std::string& line) override {
-        // TODO
+        if (Timeouted_) {
+            return;
+        }
+
+        IoDevice_.write((line + "\n").c_str());
     }
+
+    void OnTurnEnd() override {
+        TimeLeftMs_ += TimeoutAdditionPerTurnMs_;
+    }
+
+private:
+    QIODevice& IoDevice_;
+    const qint64 TimeoutMs_;
+    const qint64 TimeoutAdditionPerTurnMs_;
+
+    quint64 TimeLeftMs_;
+    bool Timeouted_;
 };
 
 int main(int argc, char *argv[]) {
@@ -153,7 +215,7 @@ int main(int argc, char *argv[]) {
 
     // Note: it is important to check log dir before game process
     try {
-        QDir logDir(QString(runConfig.LogDir_.c_str()));
+        QDir logDir(QString::fromStdString(runConfig.LogDir_));
         if (!logDir.makeAbsolute()) {
             throw std::runtime_error("failed to make log dir '" + runConfig.LogDir_ + "' absolute");
         }
@@ -162,15 +224,50 @@ int main(int argc, char *argv[]) {
         }
 
         runConfig.LogDir_ = logDir.path().toStdString();
+        qDebug() << "Current log dir:" << logDir.path();
     } catch (const std::exception& e) {
-        qDebug() << "Failed to setup logdir:" << e.what();
+        qDebug() << "Failed to setup log dir:" << e.what();
         return 1;
     }
 
-    qDebug() << "Current log dir:" << runConfig.LogDir_.c_str();
+    // Setup tmp dir
+    QDir tmpDir = QDir(QDir::currentPath()).filePath("tmp");
+    try {
+        if (!tmpDir.removeRecursively()) {
+            throw std::runtime_error("failed to remove old tmp dir '" + tmpDir.path().toStdString() + "'");
+        }
+        if (!QDir().mkpath(tmpDir.path())) {
+            throw std::runtime_error("failed to create tmp dir '" + tmpDir.path().toStdString()+ "'");
+        }
+
+        for (size_t i = 0; i < runConfig.Players_.size(); ++i) {
+            auto& playerConfig = runConfig.Players_[i];
+            if (playerConfig.Type_ == TRunConfig::TPlayer::EType::PROCESS) {
+                QDir playerFile(QString::fromStdString(playerConfig.Info_));
+
+                QString targetPath = tmpDir.filePath(playerFile.dirName()) + "_" + QString::number(i);
+                if (!QFile::copy(playerFile.path(), targetPath)) {
+                    throw std::runtime_error(
+                        "failed to copy '"
+                        + playerFile.path().toStdString()
+                        + "' to '"
+                        + tmpDir.filePath(playerFile.dirName()).toStdString()
+                        + "'"
+                    );
+                }
+
+                playerConfig.Info_ = (playerFile.dirName() + "_" + QString::number(i)).toStdString();
+            }
+        }
+
+        qDebug() << "Current tmp dir:" << tmpDir.path();
+    } catch (const std::exception& e) {
+        qDebug() << "Failed to setup tmp dir:" << e.what();
+        return 1;
+    }
 
     std::vector<std::unique_ptr<IPlayer>> playerEngines;
-    std::vector<std::unique_ptr<QProcess>> playerProcesses;
+    std::vector<std::pair<std::unique_ptr<QProcess>, int>> playerProcesses;
 
     for (const auto& playerConfig : runConfig.Players_) {
         switch (playerConfig.Type_) {
@@ -179,8 +276,22 @@ int main(int argc, char *argv[]) {
                 break;
             }
             case TRunConfig::TPlayer::EType::PROCESS: {
-                // TODO
-                playerEngines.push_back(CreateDefaultPlayer("afk"));
+                std::unique_ptr<QProcess> process = std::make_unique<QProcess>();
+                process->setWorkingDirectory(tmpDir.path());
+                process->setProgram(QString::fromStdString(playerConfig.Info_));
+                process->start();
+
+                if (!process->waitForStarted(runConfig.ProcessPlayerStartTimeoutMs_)) {
+                    qDebug() << "Failed to start " << QString::fromStdString(playerConfig.Info_) << ":" << process->errorString();
+                    return 1;
+                }
+                playerEngines.push_back(std::make_unique<TIODevicePlayer>(
+                    runConfig.GameConfig_.MaxPlayerShipMovesPerStep_,
+                    *process,
+                    runConfig.ProcessPlayerTimeoutMs_,
+                    runConfig.ProcessPLayerTimeoutAdditionPerTurnMs_
+                ));
+                playerProcesses.push_back(std::make_pair(std::move(process), static_cast<int>(playerEngines.size())));
                 break;
             }
         }
@@ -200,8 +311,19 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    qDebug() << "Start finishing players processes";
+    for (auto& [playerProcess, playerId] : playerProcesses) {
+        playerProcess->kill();
+        if (!playerProcess->waitForFinished(runConfig.ProcessPlayerFinishTimeoutMs_)) {
+            qDebug() << "Process of player" << playerId << "did not finish";
+        } else {
+            qDebug() << "Process of player" << playerId << "finished";
+        }
+    }
+    qDebug() << "Player processes are finished";
+
     try {
-        QDir logDir(QString(runConfig.LogDir_.c_str()));
+        QDir logDir(QString::fromStdString(runConfig.LogDir_));
 
         qDebug() << "Start recording log";
 

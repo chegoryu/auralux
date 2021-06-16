@@ -16,7 +16,10 @@ void TTextPlayer::SendGameInfo(const TGameInfo& gameInfo) {
 
 TPlayerMove TTextPlayer::GetMove(const TGameState& gameState, const TLastShipMoves& lastShipMoves) {
     WriteGameState(gameState, lastShipMoves);
-    return ReadPlayerMove();
+    TPlayerMove playerMove = ReadPlayerMove();
+    OnTurnEnd();
+
+    return playerMove;
 }
 
 void TTextPlayer::SendGameOver() {
@@ -90,6 +93,9 @@ TPlayerMove TTextPlayer::ReadPlayerMove() {
     int moveCount = 0;
     {
         std::string currentLine = ReadLine();
+        if (currentLine == TTextPlayer::DISQUALIFY_ME) {
+            return DisqualifyMe("Disqualify by player request");
+        }
         std::stringstream ss(currentLine);
         if (!(ss >> moveCount)) {
             return DisqualifyMe("Failed to read move count from '" + currentLine + "'");
@@ -102,6 +108,9 @@ TPlayerMove TTextPlayer::ReadPlayerMove() {
 
     for (int i = 0; i < moveCount; ++i) {
         std::string currentLine = ReadLine();
+        if (currentLine == TTextPlayer::DISQUALIFY_ME) {
+            return DisqualifyMe("Disqualify by player request");
+        }
         std::stringstream ss(currentLine);
 
         TPlayerMove::TShipMove shipMove;

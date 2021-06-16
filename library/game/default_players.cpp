@@ -173,6 +173,9 @@ void TStdinStdoutPlayer::WriteLine(const std::string& line) {
     std::cout << line << std::endl;
 }
 
+void TStdinStdoutPlayer::OnTurnEnd() {
+}
+
 std::unique_ptr<IPlayer> CreateDefaultPlayer(const std::string& playerType) {
     if (playerType == "afk") {
         return std::make_unique<TAFKPlayer>();

@@ -20,6 +20,7 @@ public:
 protected:
     virtual std::string ReadLine() = 0;
     virtual void WriteLine(const std::string& line) = 0;
+    virtual void OnTurnEnd() = 0;
 
 private:
     TPlayerMove DisqualifyMe(const std::string& reason) const;
@@ -28,6 +29,9 @@ private:
     void WriteGameState(const TGameState& gameState, const TLastShipMoves& lastShipMoves);
     void WriteGameOver();
     TPlayerMove ReadPlayerMove();
+
+protected:
+    static constexpr const char* DISQUALIFY_ME = "Disqualify me";
 
 private:
     int MaxPlayerMovesPerReadMove_;

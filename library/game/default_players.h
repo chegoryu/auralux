@@ -80,6 +80,7 @@ public:
 protected:
     std::string ReadLine() override;
     void WriteLine(const std::string& line) override;
+    void OnTurnEnd() override;
 };
 
 std::unique_ptr<IPlayer> CreateDefaultPlayer(const std::string& playerType);
