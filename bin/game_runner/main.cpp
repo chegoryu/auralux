@@ -217,10 +217,10 @@ int main(int argc, char *argv[]) {
     try {
         QDir logDir(QString::fromStdString(runConfig.LogDir_));
         if (!logDir.makeAbsolute()) {
-            throw std::runtime_error("failed to make log dir '" + runConfig.LogDir_ + "' absolute");
+            throw std::runtime_error("failed to make log dir path '" + runConfig.LogDir_ + "' absolute");
         }
         if (!QDir().mkpath(logDir.path())) {
-            throw std::runtime_error("failed to create log dir '" + runConfig.LogDir_ + "' absolute");
+            throw std::runtime_error("failed to create log dir '" + runConfig.LogDir_ + "'");
         }
 
         runConfig.LogDir_ = logDir.path().toStdString();
@@ -244,6 +244,9 @@ int main(int argc, char *argv[]) {
             auto& playerConfig = runConfig.Players_[i];
             if (playerConfig.Type_ == TRunConfig::TPlayer::EType::PROCESS) {
                 QDir playerFile(QString::fromStdString(playerConfig.Info_));
+                if (!playerFile.makeAbsolute()) {
+                    throw std::runtime_error("failed to make player file path '" + playerConfig.Info_ + "' absolute");
+                }
 
                 QString targetPath = tmpDir.filePath(playerFile.dirName()) + "_" + QString::number(i);
                 if (!QFile::copy(playerFile.path(), targetPath)) {
