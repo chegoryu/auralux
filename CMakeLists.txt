@@ -56,8 +56,8 @@ foreach(GAME_RUNNER_CONFIG IN LISTS GAME_RUNNER_CONFIGS)
 endforeach()
 
 # Test binary
-add_executable(test bin/test/main.cpp ${LIBRARY_GAME})
-target_link_libraries(test ${REQUIRED_LIBS_QUALIFIED})
+add_executable(test_bin bin/test/main.cpp ${LIBRARY_GAME})
+target_link_libraries(test_bin ${REQUIRED_LIBS_QUALIFIED})
 
 # Ejudge interactor
 add_executable(ejudge_interactor bin/ejudge_interactor/main.cpp ${LIBRARY_GAME} ${LIBRARY_TESTLIB})
