@@ -1,3 +1,7 @@
+//
+// Created by Egor Chunaev on 15.06.2021.
+//
+
 #include <QDateTime>
 #include <QDebug>
 #include <QDir>

@@ -66,5 +66,10 @@ add_executable(ejudge_interactor bin/ejudge_interactor/main.cpp ${LIBRARY_GAME} 
 add_executable(game_runner bin/game_runner/main.cpp ${LIBRARY_GAME})
 target_link_libraries(game_runner ${REQUIRED_LIBS_QUALIFIED})
 
+# Tournament runner
+add_executable(tournament_runner bin/tournament_runner/main.cpp ${LIBRARY_GAME})
+target_link_libraries(tournament_runner ${REQUIRED_LIBS_QUALIFIED})
+
 # Example player
 add_executable(example_player bin/example_player/main.cpp)
+

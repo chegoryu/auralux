@@ -1,3 +1,7 @@
+//
+// Created by Egor Chunaev on 14.06.2021.
+//
+
 #include "library/game/game.h"
 #include "library/game/game_map.h"
 #include "library/game/game_result.h"
