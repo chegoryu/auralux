@@ -83,12 +83,14 @@ void TAggressiveExpansionPlayer::SendGameInfo(const TGameInfo& gameInfo) {
             std::mt19937 rng;
             rng.seed(PlayerId_ + PlanetOrder_.size());
             std::shuffle(PlanetOrder_.begin(), PlanetOrder_.end(), rng);
+            break;
         }
         case EGameStyle::NEAREST: {
             int startPlanet = gameInfo.GameMap_.StartPlanets_.at(PlayerId_ - 1) - 1;
             std::sort(PlanetOrder_.begin(), PlanetOrder_.end(), [&startPlanet, &gameInfo](int a, int b) {
                 return gameInfo.GameMap_.Dists_.at(startPlanet).at(a) < gameInfo.GameMap_.Dists_.at(startPlanet).at(b);
             });
+            break;
         }
     }
 }
