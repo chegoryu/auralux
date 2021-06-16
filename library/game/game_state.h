@@ -41,6 +41,6 @@ struct TGameState {
     bool IsFirstStep_ = true;
 };
 
-void PrintGameState(std::ostream& stream, const TGameState& gameState);
+void PrintGameState(std::ostream& stream, const TGameState& gameState, bool planetInfoOnly = false);
 
 #endif // AURALUX_GAME_STATE_H

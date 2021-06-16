@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
     const auto gameResult = GetGameResult(gameLogger);
 
     PrintHumanReadableGameResult(tout, gameResult);
-    PrintGameState(tout, finalGameState);
+    PrintGameState(tout, finalGameState, /* planetInfoOnly = */ true);
     for (const auto& error : errors) {
         tout << error << '\n';
     }

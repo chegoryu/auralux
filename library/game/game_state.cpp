@@ -21,7 +21,7 @@ void PrintContainer(std::ostream& stream, const T& container) {
 
 } // namespace
 
-void PrintGameState(std::ostream& stream, const TGameState& gameState) {
+void PrintGameState(std::ostream& stream, const TGameState& gameState, bool planetInfoOnly) {
     {
         for (const auto& planetInfo : gameState.PlanetInfos_) {
             stream
@@ -30,6 +30,10 @@ void PrintGameState(std::ostream& stream, const TGameState& gameState) {
                 << planetInfo.Level_ << " "
                 << planetInfo.Armor_ << '\n';
         }
+    }
+
+    if (planetInfoOnly) {
+        return;
     }
 
     {
