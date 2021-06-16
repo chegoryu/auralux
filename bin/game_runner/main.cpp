@@ -195,7 +195,7 @@ private:
     const qint64 TimeoutMs_;
     const qint64 TimeoutAdditionPerTurnMs_;
 
-    quint64 TimeLeftMs_;
+    qint64 TimeLeftMs_;
     bool Timeouted_;
 };
 
