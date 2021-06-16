@@ -259,7 +259,7 @@ int main(int argc, char *argv[]) {
                     );
                 }
 
-                playerConfig.Info_ = (playerFile.dirName() + "_" + QString::number(i)).toStdString();
+                playerConfig.Info_ = targetPath.toStdString();
             }
         }
 
@@ -272,13 +272,17 @@ int main(int argc, char *argv[]) {
     std::vector<std::unique_ptr<IPlayer>> playerEngines;
     std::vector<std::pair<std::unique_ptr<QProcess>, int>> playerProcesses;
 
-    for (const auto& playerConfig : runConfig.Players_) {
+    for (size_t i = 0; i < runConfig.Players_.size(); ++i) {
+        const auto& playerConfig = runConfig.Players_[i];
         switch (playerConfig.Type_) {
             case TRunConfig::TPlayer::EType::DEFAULT: {
+                qDebug() << "Player" << i + 1 << "is default player with type" << QString::fromStdString(playerConfig.Info_);
                 playerEngines.push_back(CreateDefaultPlayer(playerConfig.Info_));
                 break;
             }
             case TRunConfig::TPlayer::EType::PROCESS: {
+                qDebug() << "Player" << i + 1 << "is process player with binary file" << QString::fromStdString(playerConfig.Info_);
+                qDebug() << "Starting player" << i + 1 << "process";
                 std::unique_ptr<QProcess> process = std::make_unique<QProcess>();
                 process->setWorkingDirectory(tmpDir.path());
                 process->setProgram(QString::fromStdString(playerConfig.Info_));
@@ -288,6 +292,8 @@ int main(int argc, char *argv[]) {
                     qDebug() << "Failed to start " << QString::fromStdString(playerConfig.Info_) << ":" << process->errorString();
                     return 1;
                 }
+                qDebug() << "Player" << i + 1 << "process started";
+
                 playerEngines.push_back(std::make_unique<TIODevicePlayer>(
                     runConfig.GameConfig_.MaxPlayerShipMovesPerStep_,
                     *process,
