@@ -43,15 +43,15 @@ set(LIBRARY_GAME
 set(LIBRARY_TESTLIB library/testlib/testlib.h)
 
 set(GAME_MAPS
-    library/maps/small_map.txt
-    library/maps/big_map.txt
-    library/maps/symmetrical_big_map.txt
+    data/maps/small_map.txt
+    data/maps/big_map.txt
+    data/maps/symmetrical_big_map.txt
 )
 foreach(GAME_MAP IN LISTS GAME_MAPS)
     configure_file(${CMAKE_SOURCE_DIR}/${GAME_MAP} ${CMAKE_CURRENT_BINARY_DIR})
 endforeach()
 
-set(GAME_RUNNER_CONFIGS library/game_runner_configs/example_config.txt)
+set(GAME_RUNNER_CONFIGS data/game_runner_configs/example_config.txt)
 foreach(GAME_RUNNER_CONFIG IN LISTS GAME_RUNNER_CONFIGS)
     configure_file(${CMAKE_SOURCE_DIR}/${GAME_RUNNER_CONFIG} ${CMAKE_CURRENT_BINARY_DIR})
 endforeach()
