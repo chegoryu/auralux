@@ -70,8 +70,13 @@ int main(int argc, char *argv[]) {
 
     PrintHumanReadableGameResult(tout, gameResult);
     PrintGameState(tout, finalGameState, /* planetInfoOnly = */ true);
-    for (const auto& error : errors) {
-        tout << error << '\n';
+
+    size_t maxErrorsInOutput = 50;
+    for (size_t i = 0; i < std::min(maxErrorsInOutput, errors.size()); ++i) {
+        tout << errors[i] << '\n';
+    }
+    if (errors.size() > maxErrorsInOutput) {
+        tout << "...\n";
     }
     tout.flush();
 
