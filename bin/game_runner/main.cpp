@@ -1,8 +1,11 @@
-#include <QtCore>
 #include <QDebug>
+#include <QProcess>
+#include <QDir>
 
 #include "library/game/game.h"
 #include "library/game/game_map.h"
+#include "library/game/game_result.h"
+#include "library/game/game_visualizer.h"
 
 #include "library/game/default_players.h"
 #include "library/game/text_player.h"
@@ -26,6 +29,8 @@ struct TRunConfig {
     std::vector<TPlayer> Players_;
 
     std::string LogDir_ = "logs";
+    bool DisableVisualizerLog_ = false;
+
     long long int ProcessPlayerTimeoutMs_ = 2000;
     long long int ProcessPLayerTimeoutAdditionPerTurnMs_ = 1;
 };
@@ -38,6 +43,7 @@ TRunConfig LoadRunConfig(const std::string& path) {
     bool hasGameMapOption = false;
     bool hasMaxStepsOption = false;
     bool hasLogDirOption = false;
+    bool hashDisableVisualizerOption = false;
     while (runConfigStream >> command) {
         if (command == "MAP") {
             if (hasGameMapOption) {
@@ -99,6 +105,13 @@ TRunConfig LoadRunConfig(const std::string& path) {
                 throw std::runtime_error("failed to read log dir");
             }
             hasLogDirOption = true;
+        } else if (command == "DISABLE_VISUALIZER_LOG") {
+            if (hashDisableVisualizerOption) {
+                throw std::runtime_error("two or more DISABLE_VISUALIZER_LOG options in config");
+            }
+
+            runConfig.DisableVisualizerLog_ = true;
+            hashDisableVisualizerOption = true;
         } else {
             throw std::runtime_error("unknown option in config: '" + command + "'");
         }
@@ -130,10 +143,116 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    TRunConfig runConfig;
     try {
-        TRunConfig runConfig = LoadRunConfig(argv[1]);
+        runConfig = LoadRunConfig(argv[1]);
     } catch (const std::exception& e) {
         qDebug() << "Failed to load run config:" << e.what();
+        return 1;
+    }
+
+    // Note: it is important to check log dir before game process
+    try {
+        QDir logDir(QString(runConfig.LogDir_.c_str()));
+        if (!logDir.makeAbsolute()) {
+            throw std::runtime_error("failed to make log dir '" + runConfig.LogDir_ + "' absolute");
+        }
+        if (!QDir().mkpath(logDir.path())) {
+            throw std::runtime_error("failed to create log dir '" + runConfig.LogDir_ + "' absolute");
+        }
+
+        runConfig.LogDir_ = logDir.path().toStdString();
+    } catch (const std::exception& e) {
+        qDebug() << "Failed to setup logdir:" << e.what();
+        return 1;
+    }
+
+    qDebug() << "Current log dir:" << runConfig.LogDir_.c_str();
+
+    std::vector<std::unique_ptr<IPlayer>> playerEngines;
+    std::vector<std::unique_ptr<QProcess>> playerProcesses;
+
+    for (const auto& playerConfig : runConfig.Players_) {
+        switch (playerConfig.Type_) {
+            case TRunConfig::TPlayer::EType::DEFAULT: {
+                playerEngines.push_back(CreateDefaultPlayer(playerConfig.Info_));
+                break;
+            }
+            case TRunConfig::TPlayer::EType::PROCESS: {
+                // TODO
+                playerEngines.push_back(CreateDefaultPlayer("afk"));
+                break;
+            }
+        }
+    }
+
+    TGame game(runConfig.GameConfig_);
+    for (auto& playerEngine : playerEngines) {
+        game.AddPlayer(std::move(playerEngine));
+    }
+
+    try {
+        qDebug() << "Start game processing";
+        game.Process();
+        qDebug() << "Game finished";
+    } catch (const std::exception& e) {
+        qDebug() << "Failed to process game:" << e.what();
+        return 1;
+    }
+
+    try {
+        QDir logDir(QString(runConfig.LogDir_.c_str()));
+
+        qDebug() << "Start recording log";
+
+        // Create all log files first
+        std::ofstream scoresLog(logDir.filePath("game_scores.log").toStdString());
+        std::ofstream gameResultLog(logDir.filePath("game_result.log").toStdString());
+        std::ofstream gameVisualizerLog(logDir.filePath("game_visualizer.log").toStdString());
+        std::ofstream errorLog(logDir.filePath("error.log").toStdString());
+
+        const auto& gameLogger = game.GetGameLogger();
+        const auto& finalGameState = gameLogger.GetFinalGameState();
+        const auto gameResult = GetGameResult(gameLogger);
+
+        {
+            // Scores log
+            bool isFirst = true;
+            for (const auto& playerScore : gameResult.PlayerScores_) {
+                scoresLog << (isFirst ? "" : " ") << playerScore;
+                isFirst = false;
+            }
+            scoresLog << '\n';
+        }
+
+        {
+            // Result log
+            PrintHumanReadableGameResult(gameResultLog, gameResult);
+            gameResultLog << '\n';
+            PrintGameState(gameResultLog, finalGameState, /* planetInfoOnly = */ true);
+        }
+
+        {
+            // Visualizer log
+            if (runConfig.DisableVisualizerLog_) {
+                qDebug() << "Warning: visualizer log is disabled";
+                gameVisualizerLog << "disabled\n";
+            } else {
+                PrintGameLogInVisualizerFormat(gameVisualizerLog, game.GetGameConfig().GameMap_, game.GetGameLogger());
+            }
+        }
+
+        {
+            // Error log
+            for (const auto& error : gameLogger.GetErrors()) {
+                errorLog << error << '\n';
+            }
+        }
+
+        qDebug() << "Log is recorded";
+
+    } catch (const std::exception& e) {
+        qDebug() << "Failed to save log files:" << e.what();
         return 1;
     }
 
