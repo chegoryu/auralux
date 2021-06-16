@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.19)
 project(Auralux)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_PREFIX_PATH /usr/local/opt/qt@5/lib/cmake/Qt5;)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
