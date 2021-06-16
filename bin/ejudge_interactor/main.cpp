@@ -73,6 +73,7 @@ int main(int argc, char *argv[]) {
     for (const auto& error : errors) {
         tout << error << '\n';
     }
+    tout.flush();
 
     if (gameResult.Result_ != TGameResult::EResult::ONE_WINNER) {
         quitf(_wa, "Game result is '%s' but must be one winner", (gameResult.Result_ == TGameResult::EResult::NO_WINNER ? "no winner" : "draw"));
