@@ -147,19 +147,23 @@ void TGame::PrePlayerMove(int playerId) {
                 } else {
                     if (currentPlanet.ShipCount_ >= shipGroup.Count_) {
                         currentPlanet.ShipCount_ -= shipGroup.Count_;
-                        shipGroup.Count_ = 0;
                     } else {
                         shipGroup.Count_ -= currentPlanet.ShipCount_;
                         currentPlanet.ShipCount_ = 0;
-                    }
 
-                    if (currentPlanet.Armor_ > shipGroup.Count_) {
-                        currentPlanet.Armor_ -= shipGroup.Count_;
-                    } else {
-                        currentPlanet.ShipCount_ = shipGroup.Count_ - currentPlanet.Armor_;
-                        currentPlanet.Armor_ = 0;
-                        currentPlanet.Level_ = 0;
-                        currentPlanet.PlayerId_ = playerId;
+                        if (currentPlanet.Level_ == 0) {
+                            currentPlanet.ShipCount_ = shipGroup.Count_;
+                            currentPlanet.Armor_ = 0;
+                            currentPlanet.Level_ = 0;
+                            currentPlanet.PlayerId_ = playerId;
+                        } else if (currentPlanet.Armor_ > shipGroup.Count_) {
+                            currentPlanet.Armor_ -= shipGroup.Count_;
+                        } else {
+                            currentPlanet.ShipCount_ = shipGroup.Count_ - currentPlanet.Armor_;
+                            currentPlanet.Armor_ = 0;
+                            currentPlanet.Level_ = 0;
+                            currentPlanet.PlayerId_ = playerId;
+                        }
                     }
                 }
 
