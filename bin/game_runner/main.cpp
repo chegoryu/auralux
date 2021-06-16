@@ -251,7 +251,7 @@ int main(int argc, char *argv[]) {
                         "failed to copy '"
                         + playerFile.path().toStdString()
                         + "' to '"
-                        + tmpDir.filePath(playerFile.dirName()).toStdString()
+                        + targetPath.toStdString()
                         + "'"
                     );
                 }
