@@ -352,6 +352,8 @@ int main(int argc, char *argv[]) {
 
         {
             // Scores log
+            scoresLog << gameResult.WinnerId_ << '\n';
+
             bool isFirst = true;
             for (const auto& playerScore : gameResult.PlayerScores_) {
                 scoresLog << (isFirst ? "" : " ") << playerScore;

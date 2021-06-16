@@ -1,0 +1,8 @@
+TOURNAMENT_TYPE, ONE_VS_ONE_ALL
+
+MAP, small_map.txt
+MAP, big_map.txt
+
+PLAYER, test1, DEFAULT afk
+PLAYER, русский тест 2, DEFAULT aggressive_expansion_nearest
+PLAYER, test3, PROCESS example_player

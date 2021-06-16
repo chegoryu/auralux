@@ -3,7 +3,6 @@
 //
 
 #include <QDebug>
-#include <QDir>
 #include <QFile>
 #include <QProcess>
 
@@ -24,7 +23,9 @@ struct TTournamentConfig {
     EType Type_;
     QVector<TPlayer> Players_;
     QVector<TMap> Maps_;
+    qint32 PlayerScoreMultiply_ = 100;
     QString GameRunnerPath_ = "game_runner";
+    QString TournamentResultPath_ = "tournament_result.csv";
 };
 
 struct TGameRun {
@@ -33,7 +34,16 @@ struct TGameRun {
 };
 
 struct TGameResult {
+    QVector<qint32> PlayerIds_;
     QVector<double> PlayerScores_;
+    qint32 WinnerId_;
+};
+
+struct TPlayerResult {
+    qint32 PlayerId_;
+    double TotalScore_;
+    qint32 GamesPlayed_;
+    qint32 AbsoluteWinnerCount_;
 };
 
 TTournamentConfig LoadTournamentConfig(QString path) {
@@ -47,34 +57,70 @@ TTournamentConfig LoadTournamentConfig(QString path) {
     QTextStream configStream(&configFile);
     configStream.setCodec("UTF-8");
 
+    bool hasTournamentTypeOption = false;
     while (!configStream.atEnd()) {
         QString line = configStream.readLine();
-        QStringList lineParts = line.split(",");
+        QStringList lineParts = line.split(",", Qt::SkipEmptyParts);
 
         if (lineParts.isEmpty()) {
             continue;
         }
 
-        if (lineParts.at(0) == "MAP") {
-            if (lineParts.size() != 2u) {
+        QString optionName = lineParts.at(0).trimmed();
+        if (optionName == "MAP") {
+            if (lineParts.size() != 2) {
                 throw std::runtime_error("wrong MAP option: '" + line.toStdString() + "'");
             }
 
             tournamentConfig.Maps_.push_back({
-                .Path_ = lineParts.at(2),
+                .Path_ = lineParts.at(1).trimmed(),
             });
-        } else if (lineParts.at(0) == "PLAYER") {
-            if (lineParts.size() != 3u) {
+
+            qDebug() << "Add map" << tournamentConfig.Maps_.back().Path_;
+        } else if (optionName == "PLAYER") {
+            if (lineParts.size() != 3) {
                 throw std::runtime_error("wrong PLAYER option: '" + line.toStdString() + "'");
             }
 
             tournamentConfig.Players_.push_back({
-                .Name_ = lineParts.at(1),
-                .GameRunnerInfo_ = lineParts.at(2)
+                .Name_ = lineParts.at(1).trimmed(),
+                .GameRunnerInfo_ = lineParts.at(2).trimmed(),
             });
+
+            qDebug() << "Add player" << tournamentConfig.Players_.back().Name_ << tournamentConfig.Players_.back().GameRunnerInfo_;
+        } else if (optionName == "TOURNAMENT_TYPE") {
+            if (hasTournamentTypeOption) {
+                throw std::runtime_error("two or more TOURNAMENT_TYPE options in config");
+            }
+            if (lineParts.size() != 2) {
+                throw std::runtime_error("wrong TOURNAMENT_TYPE option: '" + line.toStdString() + "'");
+            }
+
+            QString tournamentType = lineParts.at(1).trimmed();
+
+            if (tournamentType == "ONE_VS_ONE_ALL") {
+                tournamentConfig.Type_ = TTournamentConfig::EType::ONE_VS_ONE_ALL;
+                qDebug() << "Tournament type is ONE_VS_ONE_ALL";
+            } else {
+                throw std::runtime_error("wrong TOURNAMENT_TYPE option: '" + line.toStdString() + "'");
+            }
+
+            hasTournamentTypeOption = true;
         } else {
             throw std::runtime_error("unknown option in config: '" + line.toStdString() + "'");
         }
+    }
+
+    if (!hasTournamentTypeOption) {
+        throw std::runtime_error("TOURNAMENT_TYPE option not defined, but it is required option");
+    }
+
+    if (tournamentConfig.Players_.isEmpty()) {
+        throw std::runtime_error("empty list of players");
+    }
+
+    if (tournamentConfig.Maps_.isEmpty()) {
+        throw std::runtime_error("empty list of maps");
     }
 
     return tournamentConfig;
@@ -84,9 +130,9 @@ QVector<TGameRun> GenerateGameRunsForOneVsOneAll(const TTournamentConfig& tourna
     assert(tournamentConfig.Type_ == TTournamentConfig::EType::ONE_VS_ONE_ALL);
 
     QVector<TGameRun> gameRuns;
-    for (size_t i = 0; i < tournamentConfig.Maps_.size(); ++i) {
-        for (size_t j = 0; j < tournamentConfig.Players_.size(); ++j) {
-            for (size_t k = j + 1; k < tournamentConfig.Players_.size(); ++k) {
+    for (int i = 0; i < tournamentConfig.Maps_.size(); ++i) {
+        for (int j = 0; j < tournamentConfig.Players_.size(); ++j) {
+            for (int k = j + 1; k < tournamentConfig.Players_.size(); ++k) {
                 gameRuns.push_back({
                     .PlayerIds_ = QVector<qint32>({static_cast<qint32>(j), static_cast<qint32>(k)}),
                     .MapId_ = static_cast<qint32>(i),
@@ -109,9 +155,15 @@ QVector<TGameRun> GenerateGameRuns(const TTournamentConfig& tournamentConfig) {
     return {};
 }
 
-TGameResult ProcessGameRun(const TTournamentConfig& tournamentConfig, const TGameRun& gameRuns) {
+TGameResult ProcessGameRun(const TTournamentConfig& tournamentConfig, const TGameRun& gameRun) {
+    TGameResult gameResult;
+    gameResult.PlayerIds_ = gameRun.PlayerIds_;
+
     // TODO
-    return {};
+    gameResult.PlayerScores_ = {0.75, 0.25};
+    gameResult.WinnerId_ = gameRun.PlayerIds_[0];
+
+    return gameResult;
 }
 
 QVector<TGameResult> ProcessGameRuns(const TTournamentConfig& tournamentConfig, const QVector<TGameRun>& gameRuns) {
@@ -123,8 +175,62 @@ QVector<TGameResult> ProcessGameRuns(const TTournamentConfig& tournamentConfig, 
     return result;
 }
 
-void SaveTournamentResult(const QVector<TGameResult>& gameResults) {
-    // TODO
+void SaveTournamentResult(const TTournamentConfig& tournamentConfig, const QVector<TGameResult>& gameResults) {
+    QVector<TPlayerResult> playerResults(tournamentConfig.Players_.size());
+    for (int i = 0; i < playerResults.size(); ++i) {
+        playerResults[i] = {
+            .PlayerId_ = i,
+            .TotalScore_ = 0.0,
+            .GamesPlayed_ = 0,
+            .AbsoluteWinnerCount_ = 0,
+        };
+    }
+
+    for (const auto& gameResult : gameResults) {
+        assert(gameResult.PlayerIds_.size() == gameResult.PlayerScores_.size());
+        if (gameResult.WinnerId_ != -1) {
+            ++playerResults[gameResult.WinnerId_].AbsoluteWinnerCount_;
+        }
+        for (int i = 0; i < gameResult.PlayerIds_.size(); ++i) {
+            auto& playerResult = playerResults[gameResult.PlayerIds_[i]];
+            playerResult.TotalScore_ += gameResult.PlayerScores_[i];
+            ++playerResult.GamesPlayed_;
+        }
+    }
+
+    // Sanity check
+    for (int i = 0; i < playerResults.size() - 1; ++i) {
+        if (playerResults[i].GamesPlayed_ != playerResults[i + 1].GamesPlayed_) {
+            throw std::runtime_error(
+                "Bad number of played games: "
+                + std::to_string(playerResults[i].GamesPlayed_)
+                + " for player " + std::to_string(i + 1)
+                + ", " + std::to_string(playerResults[i + 1].GamesPlayed_)
+                + " for player " + std::to_string(i + 2)
+            );
+        }
+    }
+
+    qDebug() << "Games per player:" << playerResults[0].GamesPlayed_;
+
+    std::sort(playerResults.begin(), playerResults.end(), [](const auto& a, const auto& b){
+       return a.TotalScore_ > b.TotalScore_;
+    });
+
+    QFile resultFile(tournamentConfig.TournamentResultPath_);
+    if (!resultFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        throw std::runtime_error("failed to open result file");
+    }
+
+    QTextStream resultStream(&resultFile);
+    resultStream << "Name\tScore\tAbsoluteWinner\n";
+    for (const auto& playerResult : playerResults) {
+        assert(playerResult.PlayerId_ != -1);
+        resultStream
+            << tournamentConfig.Players_[playerResult.PlayerId_].Name_ << "\t"
+            << tournamentConfig.PlayerScoreMultiply_ * (playerResult.TotalScore_ / playerResult.GamesPlayed_) << "\t"
+            << playerResult.AbsoluteWinnerCount_ << '\n';
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -149,7 +255,9 @@ int main(int argc, char *argv[]) {
 
     QVector<TGameResult> gameResults = ProcessGameRuns(tournamentConfig, gameRuns);
 
-    SaveTournamentResult(gameResults);
+    qDebug() << "Start recording result";
+    SaveTournamentResult(tournamentConfig, gameResults);
+    qDebug() << "Tournament result is recorded";
 
     return 0;
 }
