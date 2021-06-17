@@ -18,6 +18,7 @@
 
 #include <exception>
 #include <fstream>
+#include <iostream>
 #include <memory>
 
 struct TRunConfig {
@@ -43,10 +44,9 @@ struct TRunConfig {
     long long int ProcessPLayerTimeoutAdditionPerTurnMs_ = 1;
 };
 
-TRunConfig LoadRunConfig(const std::string& path) {
+TRunConfig LoadRunConfig(std::istream& runConfigStream) {
     TRunConfig runConfig;
 
-    std::ifstream runConfigStream(path);
     std::string command;
     bool hasGameMapOption = false;
     bool hasMaxStepsOption = false;
@@ -80,7 +80,7 @@ TRunConfig LoadRunConfig(const std::string& path) {
 
             if (playerType == "DEFAULT") {
                 if (!HasDefaultPlayer(playerInfo)) {
-                    std::runtime_error("default player with type: '" + playerInfo + "' doesn't exist");
+                    throw std::runtime_error("default player with type: '" + playerInfo + "' doesn't exist");
                 }
 
                 runConfig.Players_.push_back({
@@ -211,7 +211,12 @@ int main(int argc, char *argv[]) {
 
     TRunConfig runConfig;
     try {
-        runConfig = LoadRunConfig(argv[1]);
+        if (std::string(argv[1]) == "-") {
+            runConfig = LoadRunConfig(std::cin);
+        } else {
+            std::ifstream runConfigStream(argv[1]);
+            runConfig = LoadRunConfig(runConfigStream);
+        }
     } catch (const std::exception& e) {
         qDebug() << "Failed to load run config:" << e.what();
         return 1;

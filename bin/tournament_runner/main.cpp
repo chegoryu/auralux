@@ -3,8 +3,11 @@
 //
 
 #include <QDebug>
+#include <QDir>
 #include <QFile>
 #include <QProcess>
+
+#include <memory>
 
 struct TTournamentConfig {
     enum EType {
@@ -23,8 +26,15 @@ struct TTournamentConfig {
     EType Type_;
     QVector<TPlayer> Players_;
     QVector<TMap> Maps_;
-    qint32 PlayerScoreMultiply_ = 100;
+
     QString GameRunnerPath_ = "game_runner";
+    qint64 GameRunnerStartTimeoutMs_ = 10000;
+    qint64 GameRunnerGameTimeoutMs_ = 60000;
+    qint64 GameRunnerKillTimeoutMs_ = 1000;
+    QString GamePlayerScoresFileName_ = "game_scores.log";
+
+    qint32 PlayerScoreMultiply_ = 100;
+    QString TournamentGameLogsDir_ = "logs";
     QString TournamentResultPath_ = "tournament_result.csv";
 };
 
@@ -57,6 +67,7 @@ TTournamentConfig LoadTournamentConfig(QString path) {
     QTextStream configStream(&configFile);
     configStream.setCodec("UTF-8");
 
+    bool hasGameLogsDirOption = false;
     bool hasTournamentTypeOption = false;
     while (!configStream.atEnd()) {
         QString line = configStream.readLine();
@@ -106,6 +117,17 @@ TTournamentConfig LoadTournamentConfig(QString path) {
             }
 
             hasTournamentTypeOption = true;
+        } else if (optionName == "GAME_LOGS_DIR") {
+            if (hasGameLogsDirOption) {
+                throw std::runtime_error("two or more GAME_LOGS_DIR options in config");
+            }
+            if (lineParts.size() != 2) {
+                throw std::runtime_error("wrong GAME_LOGS_DIR option: '" + line.toStdString() + "'");
+            }
+
+            tournamentConfig.TournamentGameLogsDir_ = lineParts.at(1).trimmed();
+
+            hasGameLogsDirOption = true;
         } else {
             throw std::runtime_error("unknown option in config: '" + line.toStdString() + "'");
         }
@@ -155,22 +177,126 @@ QVector<TGameRun> GenerateGameRuns(const TTournamentConfig& tournamentConfig) {
     return {};
 }
 
-TGameResult ProcessGameRun(const TTournamentConfig& tournamentConfig, const TGameRun& gameRun) {
+std::pair<qint32, QVector<double>> GetPlayerScores(QString playerScoresFilePath, int playerCount) {
+    QFile playerScoresFile(playerScoresFilePath);
+    if (!playerScoresFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        throw std::runtime_error("failed to open game scores file");
+    }
+
+    QTextStream gameScoresStream(&playerScoresFile);
+
+    qint32 winnerId;
+    QVector<double> playerScores(playerCount);
+    if ((gameScoresStream >> winnerId).status() != QTextStream::Ok) {
+        throw std::runtime_error("failed to read winner id");
+    }
+
+    if (winnerId != -1) {
+        --winnerId;
+    }
+
+    for (int i = 0; i < playerCount; ++i) {
+        if ((gameScoresStream >> playerScores[i]).status() != QTextStream::Ok) {
+            throw std::runtime_error("failed to read player score");
+        }
+    }
+    return {winnerId, playerScores};
+}
+
+TGameResult ProcessGameRun(const TTournamentConfig& tournamentConfig, const TGameRun& gameRun, int gameRunId) {
     TGameResult gameResult;
     gameResult.PlayerIds_ = gameRun.PlayerIds_;
 
-    // TODO
-    gameResult.PlayerScores_ = {0.75, 0.25};
-    gameResult.WinnerId_ = gameRun.PlayerIds_[0];
+    QString logDir = QString("%1/game_id_%2_map_%3")
+        .arg(tournamentConfig.TournamentGameLogsDir_)
+        .arg(gameRunId)
+        .arg(gameRun.MapId_);
+
+    for (int i = 0; i < gameRun.PlayerIds_.size(); ++i) {
+        logDir += QString("_player_%1").arg(gameRun.PlayerIds_[i]);
+    }
+
+    QString playerScoresFilePath = QDir(logDir).filePath(tournamentConfig.GamePlayerScoresFileName_);
+
+    auto getPlayerScores = [&playerScoresFilePath, &gameRun, &gameResult]() {
+        auto [winnerId, playerScores] = GetPlayerScores(playerScoresFilePath, gameRun.PlayerIds_.size());
+        gameResult.WinnerId_ = winnerId;
+        gameResult.PlayerScores_ = playerScores;
+    };
+
+    try {
+        // try read last run result
+        getPlayerScores();
+        return gameResult;
+    } catch (...) {
+        // Well, we need to run game
+    }
+
+    QString gameRunnerCfg = QString(
+        "MAP %1\n"
+        "LOG_DIR %2\n"
+    )
+        .arg(tournamentConfig.Maps_[gameRun.MapId_].Path_)
+        .arg(logDir);
+
+    for (const int playerId : gameRun.PlayerIds_) {
+        gameRunnerCfg += QString("PLAYER %1\n").arg(tournamentConfig.Players_[playerId].GameRunnerInfo_);
+    }
+
+    std::unique_ptr<QProcess> gameRunnerProcess = std::make_unique<QProcess>();
+
+    gameRunnerProcess->setWorkingDirectory(QDir::currentPath());
+    gameRunnerProcess->setProgram(tournamentConfig.GameRunnerPath_);
+    gameRunnerProcess->setArguments({"-"});
+    gameRunnerProcess->start();
+
+    if (!gameRunnerProcess->waitForStarted(tournamentConfig.GameRunnerStartTimeoutMs_)) {
+        qDebug() << "Failed to start game runner" << gameRunnerProcess->errorString();
+        throw std::runtime_error("Failed to start game runner");
+    }
+
+    gameRunnerProcess->write(gameRunnerCfg.toUtf8());
+    gameRunnerProcess->closeWriteChannel();
+
+    if (!gameRunnerProcess->waitForFinished(tournamentConfig.GameRunnerGameTimeoutMs_)) {
+        qDebug() << "Failed to game runner wait finished";
+        gameRunnerProcess->kill();
+        if (!gameRunnerProcess->waitForFinished(tournamentConfig.GameRunnerKillTimeoutMs_)) {
+            qDebug() << "Failed to kill game runner" << gameRunnerProcess->errorString();
+        }
+
+        throw std::runtime_error("Failed to finish game runner");
+    }
+
+    if (gameRunnerProcess->exitCode() != 0) {
+        qDebug() << "Game runner exit code" << gameRunnerProcess->exitCode();
+        qDebug() << "Game runner stdout" << gameRunnerProcess->readAllStandardOutput();
+        qDebug() << "Game runner stderr" << gameRunnerProcess->readAllStandardError();
+        throw std::runtime_error("Bad game runner exit code");
+    }
+
+    getPlayerScores();
 
     return gameResult;
 }
 
 QVector<TGameResult> ProcessGameRuns(const TTournamentConfig& tournamentConfig, const QVector<TGameRun>& gameRuns) {
     QVector<TGameResult> result;
-    for (const auto& gameRun : gameRuns) {
-        result.push_back(ProcessGameRun(tournamentConfig, gameRun));
+
+    for (int i = 0; i < gameRuns.size(); ++i) {
+        if (i && i % 20 == 0) {
+            qDebug() << QString("Processed %1/%2").arg(i).arg(gameRuns.size());
+        }
+
+        const auto& gameRun = gameRuns[i];
+        try {
+            result.push_back(ProcessGameRun(tournamentConfig, gameRun, i));
+        } catch (const std::exception& e) {
+            qDebug() << "Failed to process" << i << "game run:" << e.what();
+            throw;
+        }
     }
+    qDebug() << QString("Processed %1/%2").arg(gameRuns.size()).arg(gameRuns.size());
 
     return result;
 }
@@ -189,7 +315,7 @@ void SaveTournamentResult(const TTournamentConfig& tournamentConfig, const QVect
     for (const auto& gameResult : gameResults) {
         assert(gameResult.PlayerIds_.size() == gameResult.PlayerScores_.size());
         if (gameResult.WinnerId_ != -1) {
-            ++playerResults[gameResult.WinnerId_].AbsoluteWinnerCount_;
+            ++playerResults[gameResult.PlayerIds_[gameResult.WinnerId_]].AbsoluteWinnerCount_;
         }
         for (int i = 0; i < gameResult.PlayerIds_.size(); ++i) {
             auto& playerResult = playerResults[gameResult.PlayerIds_[i]];
@@ -202,7 +328,7 @@ void SaveTournamentResult(const TTournamentConfig& tournamentConfig, const QVect
     for (int i = 0; i < playerResults.size() - 1; ++i) {
         if (playerResults[i].GamesPlayed_ != playerResults[i + 1].GamesPlayed_) {
             throw std::runtime_error(
-                "Bad number of played games: "
+                "bad number of played games: "
                 + std::to_string(playerResults[i].GamesPlayed_)
                 + " for player " + std::to_string(i + 1)
                 + ", " + std::to_string(playerResults[i + 1].GamesPlayed_)
@@ -247,17 +373,50 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    try {
+        QDir gameLogsDir(tournamentConfig.TournamentGameLogsDir_);
+        if (!gameLogsDir.makeAbsolute()) {
+            throw std::runtime_error(
+                "failed to make game logs dir path '"
+                + tournamentConfig.TournamentGameLogsDir_.toStdString()
+                + "' absolute"
+            );
+        }
+        if (!QDir().mkpath(gameLogsDir.path())) {
+            throw std::runtime_error("failed to create log dir '" + gameLogsDir.path().toStdString() + "'");
+        }
+
+        tournamentConfig.TournamentGameLogsDir_ = gameLogsDir.path();
+        qDebug() << "Current game logs dir:" << gameLogsDir.path();
+    } catch (const std::exception& e) {
+        qDebug() << "Failed to setup game logs dir:" << e.what();
+        return 1;
+    }
+
     qDebug() << "Total players:" << tournamentConfig.Players_.size();
     qDebug() << "Total maps:" << tournamentConfig.Maps_.size();
 
     QVector<TGameRun> gameRuns = GenerateGameRuns(tournamentConfig);
     qDebug() << "Total game runs:" << gameRuns.size();
 
-    QVector<TGameResult> gameResults = ProcessGameRuns(tournamentConfig, gameRuns);
+    QVector<TGameResult> gameResults;
+    try {
+        qDebug() << "Start processing game runs";
+        gameResults = ProcessGameRuns(tournamentConfig, gameRuns);
+        qDebug() << "Game runs processing finished";
+    } catch (const std::exception& e) {
+        qDebug() << "Failed process game runs:" << e.what();
+        return 1;
+    }
 
-    qDebug() << "Start recording result";
-    SaveTournamentResult(tournamentConfig, gameResults);
-    qDebug() << "Tournament result is recorded";
+    try {
+        qDebug() << "Start recording result";
+        SaveTournamentResult(tournamentConfig, gameResults);
+        qDebug() << "Tournament result is recorded";
+    } catch (const std::exception& e) {
+        qDebug() << "Failed to save result file:" << e.what();
+        return 1;
+    }
 
     return 0;
 }
