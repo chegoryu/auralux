@@ -30,6 +30,7 @@ struct TTournamentConfig {
         qint64 GameTimeoutMs_ = 60000;
         qint64 KillTimeoutMs_ = 1000;
         QString PlayerScoresFileName_ = "game_scores.log";
+        QString TmpDir_ = "tmp";
     };
 
     struct TResultSaverConfig {
@@ -221,14 +222,21 @@ TGameResult ProcessGameRun(const TTournamentConfig& tournamentConfig, const TGam
     gameResult.PlayerIds_ = gameRun.PlayerIds_;
     gameResult.FromCache_ = false;
 
-    QString logDir = QString("%1/game_id_%2_map_%3")
-        .arg(tournamentConfig.TournamentGameLogsDir_)
+    QString runDirName = QString("game_id_%2_map_%3")
         .arg(gameRunId)
         .arg(gameRun.MapId_);
 
     for (int i = 0; i < gameRun.PlayerIds_.size(); ++i) {
-        logDir += QString("_player_%1").arg(gameRun.PlayerIds_[i]);
+        runDirName += QString("_player_%1").arg(gameRun.PlayerIds_[i]);
     }
+
+    QString logDir = QString("%1/%2")
+        .arg(tournamentConfig.TournamentGameLogsDir_)
+        .arg(runDirName);
+
+    QString gameRunnerTmpDir = QString("%1/%2")
+        .arg(tournamentConfig.GameRunnerConfig_.TmpDir_)
+        .arg(runDirName);
 
     QString playerScoresFilePath = QDir(logDir).filePath(tournamentConfig.GameRunnerConfig_.PlayerScoresFileName_);
 
@@ -250,9 +258,11 @@ TGameResult ProcessGameRun(const TTournamentConfig& tournamentConfig, const TGam
     QString gameRunnerCfg = QString(
         "MAP %1\n"
         "LOG_DIR %2\n"
+        "TMP_DIR %3\n"
     )
         .arg(tournamentConfig.Maps_[gameRun.MapId_].Path_)
-        .arg(logDir);
+        .arg(logDir)
+        .arg(gameRunnerTmpDir);
 
     for (const int playerId : gameRun.PlayerIds_) {
         gameRunnerCfg += QString("PLAYER %1\n").arg(tournamentConfig.Players_[playerId].GameRunnerInfo_);

@@ -45,6 +45,7 @@ struct TRunConfig {
     TPlayerProcessConfig PlayerProcessConfig_;
 
     std::string LogDir_ = "logs";
+    std::string TmpDir_ = "tmp/self_run";
     bool DisableVisualizerLog_ = false;
 };
 
@@ -55,7 +56,8 @@ TRunConfig LoadRunConfig(std::istream& runConfigStream) {
     bool hasGameMapOption = false;
     bool hasMaxStepsOption = false;
     bool hasLogDirOption = false;
-    bool hashDisableVisualizerOption = false;
+    bool hasTmpDirOption = false;
+    bool hasDisableVisualizerOption = false;
     while (runConfigStream >> command) {
         if (command == "MAP") {
             if (hasGameMapOption) {
@@ -68,7 +70,7 @@ TRunConfig LoadRunConfig(std::istream& runConfigStream) {
             }
 
             std::ifstream mapStream(mapPath);
-            runConfig.GameConfig_.GameMap_ =  LoadPlanarGraph([&mapStream]() {
+            runConfig.GameConfig_.GameMap_ = LoadPlanarGraph([&mapStream]() {
                 int x;
                 if (!(mapStream >> x)) {
                     throw std::runtime_error("failed to read map");
@@ -88,14 +90,14 @@ TRunConfig LoadRunConfig(std::istream& runConfigStream) {
                 }
 
                 runConfig.Players_.push_back({
-                   .Type_ = TRunConfig::TPlayer::EType::DEFAULT,
-                   .Info_ = playerInfo,
-                });
+                                                 .Type_ = TRunConfig::TPlayer::EType::DEFAULT,
+                                                 .Info_ = playerInfo,
+                                             });
             } else if (playerType == "PROCESS") {
                 runConfig.Players_.push_back({
-                     .Type_ = TRunConfig::TPlayer::EType::PROCESS,
-                     .Info_ = playerInfo,
-                 });
+                                                 .Type_ = TRunConfig::TPlayer::EType::PROCESS,
+                                                 .Info_ = playerInfo,
+                                             });
             } else {
                 throw std::runtime_error("unknown player type: '" + playerType + "'");
             }
@@ -117,13 +119,22 @@ TRunConfig LoadRunConfig(std::istream& runConfigStream) {
                 throw std::runtime_error("failed to read log dir");
             }
             hasLogDirOption = true;
+        } else if (command == "TMP_DIR") {
+            if (hasTmpDirOption) {
+                throw std::runtime_error("two or more TMP_DIR options in config");
+            }
+
+            if (!(runConfigStream >> runConfig.TmpDir_)) {
+                throw std::runtime_error("failed to read tmp dir");
+            }
+            hasTmpDirOption = true;
         } else if (command == "DISABLE_VISUALIZER_LOG") {
-            if (hashDisableVisualizerOption) {
+            if (hasDisableVisualizerOption) {
                 throw std::runtime_error("two or more DISABLE_VISUALIZER_LOG options in config");
             }
 
             runConfig.DisableVisualizerLog_ = true;
-            hashDisableVisualizerOption = true;
+            hasDisableVisualizerOption = true;
         } else {
             throw std::runtime_error("unknown option in config: '" + command + "'");
         }
@@ -246,7 +257,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Setup tmp dir
-    QDir tmpDir = QDir(QDir::currentPath()).filePath("tmp");
+    QDir tmpDir = QDir(QDir::currentPath()).filePath(QString::fromStdString(runConfig.TmpDir_));
     try {
         if (!tmpDir.removeRecursively()) {
             throw std::runtime_error("failed to remove old tmp dir '" + tmpDir.path().toStdString() + "'");
