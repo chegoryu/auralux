@@ -9,7 +9,7 @@
 void PrintGameLogInVisualizerFormat(std::ostream& stream, const TGameMap& gameMap, const TGameLogger& gameLogger) {
     assert(gameMap.Points_);
 
-    stream << gameMap.Points_->size() << '\n';
+    stream << gameMap.Points_->size() << " " << gameMap.StartPlanets_.size() << '\n';
     for (const auto& point : *gameMap.Points_) {
         stream << point.x << " " << point.y << '\n';
     }
