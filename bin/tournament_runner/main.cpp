@@ -2,6 +2,7 @@
 // Created by Egor Chunaev on 16.06.2021.
 //
 
+#include <QDateTime>
 #include <QDebug>
 #include <QDir>
 #include <QFile>
@@ -364,6 +365,8 @@ void SaveTournamentResult(const TTournamentConfig& tournamentConfig, const QVect
 }
 
 int main(int argc, char *argv[]) {
+    QDateTime startTime = QDateTime::currentDateTime();
+
     if (argc < 2) {
         qDebug() << "Usage:" << argv[0] << "<config_file>";
         return 1;
@@ -421,6 +424,9 @@ int main(int argc, char *argv[]) {
         qDebug() << "Failed to save result file:" << e.what();
         return 1;
     }
+
+    QDateTime endTime = QDateTime::currentDateTime();
+    qDebug() << "Total time:" << startTime.msecsTo(endTime) << "ms";
 
     return 0;
 }

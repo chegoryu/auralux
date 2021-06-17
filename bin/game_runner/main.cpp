@@ -204,6 +204,8 @@ private:
 };
 
 int main(int argc, char *argv[]) {
+    QDateTime startTime = QDateTime::currentDateTime();
+
     if (argc < 2) {
         qDebug() << "Usage:" << argv[0] << "<config_file>";
         return 1;
@@ -397,6 +399,9 @@ int main(int argc, char *argv[]) {
         qDebug() << "Failed to save log files:" << e.what();
         return 1;
     }
+
+    QDateTime endTime = QDateTime::currentDateTime();
+    qDebug() << "Total time:" << startTime.msecsTo(endTime) << "ms";
 
     return 0;
 }
