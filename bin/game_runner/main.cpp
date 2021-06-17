@@ -283,9 +283,9 @@ int main(int argc, char *argv[]) {
                     .arg(targetFileNameSuffix.isEmpty() ? "" : QString(".%1").arg(targetFileNameSuffix));
 
                 QString targetPath = tmpDir.filePath(targetFileName);
-                if (!QFile::copy(playerFile.filePath(), targetPath)) {
+                if (!QFile::link(playerFile.filePath(), targetPath)) {
                     throw std::runtime_error(
-                        "failed to copy '"
+                        "failed to link '"
                         + playerFile.filePath().toStdString()
                         + "' to '"
                         + targetPath.toStdString()
