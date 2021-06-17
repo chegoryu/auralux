@@ -225,7 +225,7 @@ TGameResult ProcessGameRun(const TTournamentConfig& tournamentConfig, const TGam
     };
 
     try {
-        // try read last run result
+        // Try read last run result
         getPlayerScores();
         return gameResult;
     } catch (...) {
