@@ -90,14 +90,14 @@ TRunConfig LoadRunConfig(std::istream& runConfigStream) {
                 }
 
                 runConfig.Players_.push_back({
-                                                 .Type_ = TRunConfig::TPlayer::EType::DEFAULT,
-                                                 .Info_ = playerInfo,
-                                             });
+                    .Type_ = TRunConfig::TPlayer::EType::DEFAULT,
+                    .Info_ = playerInfo,
+                });
             } else if (playerType == "PROCESS") {
                 runConfig.Players_.push_back({
-                                                 .Type_ = TRunConfig::TPlayer::EType::PROCESS,
-                                                 .Info_ = playerInfo,
-                                             });
+                    .Type_ = TRunConfig::TPlayer::EType::PROCESS,
+                    .Info_ = playerInfo,
+                });
             } else {
                 throw std::runtime_error("unknown player type: '" + playerType + "'");
             }
