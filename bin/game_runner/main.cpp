@@ -270,23 +270,23 @@ int main(int argc, char *argv[]) {
         for (size_t i = 0; i < runConfig.Players_.size(); ++i) {
             auto& playerConfig = runConfig.Players_[i];
             if (playerConfig.Type_ == TRunConfig::TPlayer::EType::PROCESS) {
-                QDir playerFile(QString::fromStdString(playerConfig.Info_));
+                QFileInfo playerFile(QString::fromStdString(playerConfig.Info_));
                 if (!playerFile.makeAbsolute()) {
                     throw std::runtime_error("failed to make player file path '" + playerConfig.Info_ + "' absolute");
                 }
 
-                QString targetFileNameBase = QFileInfo(playerFile.dirName()).completeBaseName();
-                QString targetFileNameSuffix = QFileInfo(playerFile.dirName()).suffix();
+                QString targetFileNameBase = playerFile.completeBaseName();
+                QString targetFileNameSuffix = playerFile.suffix();
                 QString targetFileName = QString("%1_%2%3")
                     .arg(targetFileNameBase)
                     .arg(i)
                     .arg(targetFileNameSuffix.isEmpty() ? "" : QString(".%1").arg(targetFileNameSuffix));
 
                 QString targetPath = tmpDir.filePath(targetFileName);
-                if (!QFile::copy(playerFile.path(), targetPath)) {
+                if (!QFile::copy(playerFile.filePath(), targetPath)) {
                     throw std::runtime_error(
                         "failed to copy '"
-                        + playerFile.path().toStdString()
+                        + playerFile.filePath().toStdString()
                         + "' to '"
                         + targetPath.toStdString()
                         + "'"
