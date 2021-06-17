@@ -9,6 +9,7 @@
 #include "game_logger.h"
 #include "player.h"
 
+#include <functional>
 #include <memory>
 
 class TGame {
@@ -29,6 +30,8 @@ public:
         TGameMap GameMap_;
     };
 
+    using TOnNewStepCallback = std::function<void(int)>;
+
 private:
     struct TPlayerInfo {
         std::unique_ptr<IPlayer> PlayerEngine_;
@@ -41,6 +44,7 @@ public:
     explicit TGame(const TConfig& config);
 
     void AddPlayer(std::unique_ptr<IPlayer> player);
+    void SetOnNewStepCallback(TOnNewStepCallback&& onNewStepCallback);
     void Process();
 
     [[nodiscard]] const TConfig& GetGameConfig() const;
@@ -67,6 +71,7 @@ private:
     std::vector<TPlayerInfo> Players_;
 
     TGameLogger GameLogger_;
+    TOnNewStepCallback OnNewStepCallback_ = [](int){};
 };
 
 #endif // AURALUX_GAME_H

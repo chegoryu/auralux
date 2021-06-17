@@ -345,6 +345,11 @@ int main(int argc, char *argv[]) {
     for (auto& playerEngine : playerEngines) {
         game.AddPlayer(std::move(playerEngine));
     }
+    game.SetOnNewStepCallback([](int stepId) {
+        if (stepId && stepId % 250 == 0) {
+            qDebug() << "Current step:" << stepId;
+        }
+    });
 
     try {
         qDebug() << "Start game processing";

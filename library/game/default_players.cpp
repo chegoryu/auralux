@@ -105,7 +105,7 @@ TPlayerMove TAggressiveExpansionPlayer::GetMove(const TGameState& gameState, con
     playerMove.DisqualifyMe_ = false;
     std::vector<int> order(gameState.PlanetInfos_.size());
     for (size_t i = 0; i < order.size(); ++i) {
-        order.push_back(i);
+        order[i] = i;
     }
     if (SortPlanetsByShipCount_) {
         std::sort(order.begin(), order.end(), [&gameState](int a, int b) {

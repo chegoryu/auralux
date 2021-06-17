@@ -46,11 +46,17 @@ void TGame::AddPlayer(std::unique_ptr<IPlayer> player) {
     LastShipMovesByPlayer_.push_back({});
 }
 
+void TGame::SetOnNewStepCallback(TOnNewStepCallback&& onNewStepCallback) {
+    OnNewStepCallback_ = onNewStepCallback;
+}
+
 void TGame::Process() {
     assert(Players_.size() == Config_.GameMap_.StartPlanets_.size());
 
     if (Init()) {
         for (int stepId = 0; stepId < Config_.MaxSteps_; ++stepId) {
+            OnNewStepCallback_(stepId);
+
             if (!Step()) {
                 break;
             }
