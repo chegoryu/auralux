@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QProcess>
 
 #include "library/game/game.h"
@@ -274,7 +275,14 @@ int main(int argc, char *argv[]) {
                     throw std::runtime_error("failed to make player file path '" + playerConfig.Info_ + "' absolute");
                 }
 
-                QString targetPath = tmpDir.filePath(playerFile.dirName()) + "_" + QString::number(i);
+                QString targetFileNameBase = QFileInfo(playerFile.dirName()).completeBaseName();
+                QString targetFileNameSuffix = QFileInfo(playerFile.dirName()).suffix();
+                QString targetFileName = QString("%1_%2%3")
+                    .arg(targetFileNameBase)
+                    .arg(i)
+                    .arg(targetFileNameSuffix.isEmpty() ? "" : QString(".%1").arg(targetFileNameSuffix));
+
+                QString targetPath = tmpDir.filePath(targetFileName);
                 if (!QFile::copy(playerFile.path(), targetPath)) {
                     throw std::runtime_error(
                         "failed to copy '"
