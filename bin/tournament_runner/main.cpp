@@ -6,14 +6,17 @@
 #include <QDebug>
 #include <QDir>
 #include <QFile>
+#include <QHash>
 #include <QProcess>
 
 #include <cassert>
 #include <memory>
+#include <random>
 
 struct TTournamentConfig {
     enum EType {
         ONE_VS_ONE_ALL = 0,
+        FREE_FOR_ALL = 1,
     };
 
     struct TPlayer {
@@ -44,6 +47,9 @@ struct TTournamentConfig {
     QVector<TMap> Maps_;
 
     QString TournamentGameLogsDir_ = "logs";
+    // For FREE_FOR_ALL
+    qint32 TournamentSteps_ = 1000;
+
     TGameRunnerConfig GameRunnerConfig_;
     TResultSaverConfig ResultSaverConfig_;
 };
@@ -80,6 +86,7 @@ TTournamentConfig LoadTournamentConfig(QString path) {
 
     bool hasGameLogsDirOption = false;
     bool hasTournamentTypeOption = false;
+    bool hasTournamentStepsOption = false;
     while (!configStream.atEnd()) {
         QString line = configStream.readLine();
         QStringList lineParts = line.split(",", Qt::SkipEmptyParts);
@@ -123,11 +130,28 @@ TTournamentConfig LoadTournamentConfig(QString path) {
             if (tournamentType == "ONE_VS_ONE_ALL") {
                 tournamentConfig.Type_ = TTournamentConfig::EType::ONE_VS_ONE_ALL;
                 qDebug() << "Tournament type is ONE_VS_ONE_ALL";
+            } else if (tournamentType == "FREE_FOR_ALL") {
+                tournamentConfig.Type_ = TTournamentConfig::EType::FREE_FOR_ALL;
+                qDebug() << "Tournament type is FREE_FOR_ALL";
             } else {
                 throw std::runtime_error("wrong TOURNAMENT_TYPE option: '" + line.toStdString() + "'");
             }
 
             hasTournamentTypeOption = true;
+        } else if (optionName == "TOURNAMENT_STEPS") {
+            if (hasTournamentStepsOption) {
+                throw std::runtime_error("two or more TOURNAMENT_STEPS options in config");
+            }
+            if (lineParts.size() != 2) {
+                throw std::runtime_error("wrong TOURNAMENT_STEPS option: '" + line.toStdString() + "'");
+            }
+
+            bool ok;
+            tournamentConfig.TournamentSteps_ = lineParts.at(1).trimmed().toInt(&ok);
+            if (!ok) {
+                throw std::runtime_error("wrong TOURNAMENT_STEPS option: '" + line.toStdString() + "'");
+            }
+            hasTournamentStepsOption = true;
         } else if (optionName == "GAME_LOGS_DIR") {
             if (hasGameLogsDirOption) {
                 throw std::runtime_error("two or more GAME_LOGS_DIR options in config");
@@ -156,6 +180,18 @@ TTournamentConfig LoadTournamentConfig(QString path) {
         throw std::runtime_error("empty list of maps");
     }
 
+    if (tournamentConfig.Type_ == TTournamentConfig::EType::ONE_VS_ONE_ALL) {
+        if (hasTournamentStepsOption) {
+            throw std::runtime_error("TOURNAMENT_STEPS is useless with ONE_VS_ONE_ALL tournament type");
+        }
+    }
+
+    if (tournamentConfig.Type_ == TTournamentConfig::EType::FREE_FOR_ALL) {
+        if (tournamentConfig.Players_.size() % 4 != 0) {
+            throw std::runtime_error("number of players must be divisible by 4 for FREE_FOR_ALL tournament type");
+        }
+    }
+
     return tournamentConfig;
 }
 
@@ -181,10 +217,46 @@ QVector<TGameRun> GenerateGameRunsForOneVsOneAll(const TTournamentConfig& tourna
     return gameRuns;
 }
 
+QVector<TGameRun> GenerateGameRunsForFreeForAll(const TTournamentConfig& tournamentConfig) {
+    assert(tournamentConfig.Type_ == TTournamentConfig::EType::FREE_FOR_ALL);
+    assert(tournamentConfig.Players_.size() % 4 == 0);
+
+    qDebug() << "Free for all steps:" << tournamentConfig.TournamentSteps_;
+
+    quint32 seed = 0;
+    for (const auto& playerConfig : tournamentConfig.Players_) {
+        seed ^= qHash(playerConfig.Name_);
+    }
+    std::mt19937 rng(seed);
+    qDebug() << "Rnd seed" << seed;
+
+    QVector<qint32> order(tournamentConfig.Players_.size());
+    for (int i = 0; i < tournamentConfig.Players_.size(); ++i) {
+        order[i] = i;
+    }
+
+    QVector<TGameRun> gameRuns;
+    for (int i = 0; i < tournamentConfig.TournamentSteps_; ++i) {
+        std::shuffle(order.begin(), order.end(), rng);
+
+        for (int j = 0; j < tournamentConfig.Players_.size(); j += 4) {
+            gameRuns.push_back({
+               .PlayerIds_ = QVector<qint32>({order[j], order[j + 1], order[j + 2], order[j + 3]}),
+               .MapId_ = static_cast<qint32>(rng() % tournamentConfig.Maps_.size()),
+           });
+        }
+    }
+
+    return gameRuns;
+}
+
 QVector<TGameRun> GenerateGameRuns(const TTournamentConfig& tournamentConfig) {
     switch (tournamentConfig.Type_) {
         case TTournamentConfig::EType::ONE_VS_ONE_ALL: {
             return GenerateGameRunsForOneVsOneAll(tournamentConfig);
+        }
+        case TTournamentConfig::EType::FREE_FOR_ALL: {
+            return GenerateGameRunsForFreeForAll(tournamentConfig);
         }
     }
 
@@ -224,7 +296,7 @@ TGameResult ProcessGameRun(const TTournamentConfig& tournamentConfig, const TGam
     gameResult.FromCache_ = false;
 
     QString runDirName = QString("game_id_%2_map_%3")
-        .arg(gameRunId)
+        .arg(gameRunId, 5, 10, QChar('0'))
         .arg(gameRun.MapId_);
 
     for (int i = 0; i < gameRun.PlayerIds_.size(); ++i) {
