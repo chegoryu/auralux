@@ -55,6 +55,7 @@ struct TGameResult {
     QVector<qint32> PlayerIds_;
     QVector<double> PlayerScores_;
     qint32 WinnerId_;
+    bool FromCache_;
 };
 
 struct TPlayerResult {
@@ -218,6 +219,7 @@ std::pair<qint32, QVector<double>> GetPlayerScores(QString playerScoresFilePath,
 TGameResult ProcessGameRun(const TTournamentConfig& tournamentConfig, const TGameRun& gameRun, int gameRunId) {
     TGameResult gameResult;
     gameResult.PlayerIds_ = gameRun.PlayerIds_;
+    gameResult.FromCache_ = false;
 
     QString logDir = QString("%1/game_id_%2_map_%3")
         .arg(tournamentConfig.TournamentGameLogsDir_)
@@ -239,6 +241,7 @@ TGameResult ProcessGameRun(const TTournamentConfig& tournamentConfig, const TGam
     try {
         // Try read last run result
         getPlayerScores();
+        gameResult.FromCache_ = true;
         return gameResult;
     } catch (...) {
         // Well, we need to run game
@@ -295,20 +298,30 @@ TGameResult ProcessGameRun(const TTournamentConfig& tournamentConfig, const TGam
 QVector<TGameResult> ProcessGameRuns(const TTournamentConfig& tournamentConfig, const QVector<TGameRun>& gameRuns) {
     QVector<TGameResult> result;
 
+    int fromCache = 0;
     for (int i = 0; i < gameRuns.size(); ++i) {
         if (i && i % 20 == 0) {
-            qDebug() << QString("Processed %1/%2").arg(i).arg(gameRuns.size());
+            qDebug() << QString("Processed %1/%2, from cache %3, real game runs %4")
+                .arg(i)
+                .arg(gameRuns.size())
+                .arg(fromCache)
+                .arg(i - fromCache);
         }
 
         const auto& gameRun = gameRuns[i];
         try {
             result.push_back(ProcessGameRun(tournamentConfig, gameRun, i));
+            fromCache += result.back().FromCache_;
         } catch (const std::exception& e) {
             qDebug() << "Failed to process" << i << "game run:" << e.what();
             throw;
         }
     }
-    qDebug() << QString("Processed %1/%2").arg(gameRuns.size()).arg(gameRuns.size());
+    qDebug() << QString("Processed %1/%2, from cache %3, real game runs %4")
+        .arg(gameRuns.size())
+        .arg(gameRuns.size())
+        .arg(fromCache)
+        .arg(gameRuns.size() - fromCache);
 
     return result;
 }
