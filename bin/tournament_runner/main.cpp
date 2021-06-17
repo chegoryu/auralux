@@ -8,6 +8,7 @@
 #include <QFile>
 #include <QProcess>
 
+#include <cassert>
 #include <memory>
 
 struct TTournamentConfig {
