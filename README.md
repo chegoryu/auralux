@@ -143,4 +143,28 @@
 
 ***Любые константы могут быть изменены.***
 
+# Установка
+## Установка под мак
+
+1) Если у вас нет brew, установите его, введя в терминал команду 
+```
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+2) Установите и обновите нужные версии пакетов (на linux возможно подойдут те же команды, но со своим менеджером пакетов)
+```
+brew install cmake && brew upgrade cmake && brew install qt5 && brew upgrade qt5 && brew link qt5 --force
+```
+3) Скачайте репозиторий
+```
+git clone https://github.com/chegoryu/Auralux.git
+```
+4) Соберите репозиторий
+```
+cd Auralux && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="/usr/local/opt/qt5/" .. && make
+```
+5) В вашей папке будет находится ранер стратегии. Можете запустить его командой 
+```
+./game_runner example_runner_config.txt
+```
+
 
