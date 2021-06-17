@@ -35,12 +35,12 @@ TGameMap LoadPlanarGraph(int maxDistBetweenPlanets, std::function<int()> readInt
             int dist = std::round(sqrtl(sqDist));
             if (dist <= 0 || dist > maxDistBetweenPlanets) {
                 throw std::runtime_error(
-                    "Dist between "
+                    "distance between "
                     + std::to_string(i + 1)
                     + " and "
                     + std::to_string(j + 1)
                     + " is " + std::to_string(dist)
-                    + " but allowed range is "
+                    + " but allowed distance range is "
                     + "[" + std::to_string(1) + "; " + std::to_string(maxDistBetweenPlanets) + "]"
                 );
             }
