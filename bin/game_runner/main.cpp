@@ -346,7 +346,7 @@ int main(int argc, char *argv[]) {
         game.AddPlayer(std::move(playerEngine));
     }
     game.SetOnNewStepCallback([](int stepId) {
-        if (stepId && stepId % 250 == 0) {
+        if (stepId && stepId % 1000 == 0) {
             qDebug() << "Current step:" << stepId;
         }
     });
