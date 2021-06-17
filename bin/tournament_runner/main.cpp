@@ -159,6 +159,10 @@ QVector<TGameRun> GenerateGameRunsForOneVsOneAll(const TTournamentConfig& tourna
                     .PlayerIds_ = QVector<qint32>({static_cast<qint32>(j), static_cast<qint32>(k)}),
                     .MapId_ = static_cast<qint32>(i),
                 });
+                gameRuns.push_back({
+                   .PlayerIds_ = QVector<qint32>({static_cast<qint32>(k), static_cast<qint32>(j)}),
+                   .MapId_ = static_cast<qint32>(i),
+               });
             }
         }
     }
