@@ -24,19 +24,26 @@ struct TTournamentConfig {
         QString Path_;
     };
 
+    struct TGameRunnerConfig {
+        QString Path_ = "game_runner";
+        qint64 StartTimeoutMs_ = 10000;
+        qint64 GameTimeoutMs_ = 60000;
+        qint64 KillTimeoutMs_ = 1000;
+        QString PlayerScoresFileName_ = "game_scores.log";
+    };
+
+    struct TResultSaverConfig {
+        QString ResultPath_ = "tournament_result.csv";
+        qint32 PlayerScoreMultiply_ = 100;
+    };
+
     EType Type_;
     QVector<TPlayer> Players_;
     QVector<TMap> Maps_;
 
-    QString GameRunnerPath_ = "game_runner";
-    qint64 GameRunnerStartTimeoutMs_ = 10000;
-    qint64 GameRunnerGameTimeoutMs_ = 60000;
-    qint64 GameRunnerKillTimeoutMs_ = 1000;
-    QString GamePlayerScoresFileName_ = "game_scores.log";
-
-    qint32 PlayerScoreMultiply_ = 100;
     QString TournamentGameLogsDir_ = "logs";
-    QString TournamentResultPath_ = "tournament_result.csv";
+    TGameRunnerConfig GameRunnerConfig_;
+    TResultSaverConfig ResultSaverConfig_;
 };
 
 struct TGameRun {
@@ -221,7 +228,7 @@ TGameResult ProcessGameRun(const TTournamentConfig& tournamentConfig, const TGam
         logDir += QString("_player_%1").arg(gameRun.PlayerIds_[i]);
     }
 
-    QString playerScoresFilePath = QDir(logDir).filePath(tournamentConfig.GamePlayerScoresFileName_);
+    QString playerScoresFilePath = QDir(logDir).filePath(tournamentConfig.GameRunnerConfig_.PlayerScoresFileName_);
 
     auto getPlayerScores = [&playerScoresFilePath, &gameRun, &gameResult]() {
         auto [winnerId, playerScores] = GetPlayerScores(playerScoresFilePath, gameRun.PlayerIds_.size());
@@ -251,11 +258,11 @@ TGameResult ProcessGameRun(const TTournamentConfig& tournamentConfig, const TGam
     std::unique_ptr<QProcess> gameRunnerProcess = std::make_unique<QProcess>();
 
     gameRunnerProcess->setWorkingDirectory(QDir::currentPath());
-    gameRunnerProcess->setProgram(tournamentConfig.GameRunnerPath_);
+    gameRunnerProcess->setProgram(tournamentConfig.GameRunnerConfig_.Path_);
     gameRunnerProcess->setArguments({"-"});
     gameRunnerProcess->start();
 
-    if (!gameRunnerProcess->waitForStarted(tournamentConfig.GameRunnerStartTimeoutMs_)) {
+    if (!gameRunnerProcess->waitForStarted(tournamentConfig.GameRunnerConfig_.StartTimeoutMs_)) {
         qDebug() << "Failed to start game runner" << gameRunnerProcess->errorString();
         throw std::runtime_error("Failed to start game runner");
     }
@@ -263,10 +270,10 @@ TGameResult ProcessGameRun(const TTournamentConfig& tournamentConfig, const TGam
     gameRunnerProcess->write(gameRunnerCfg.toUtf8());
     gameRunnerProcess->closeWriteChannel();
 
-    if (!gameRunnerProcess->waitForFinished(tournamentConfig.GameRunnerGameTimeoutMs_)) {
+    if (!gameRunnerProcess->waitForFinished(tournamentConfig.GameRunnerConfig_.GameTimeoutMs_)) {
         qDebug() << "Failed to game runner wait finished";
         gameRunnerProcess->kill();
-        if (!gameRunnerProcess->waitForFinished(tournamentConfig.GameRunnerKillTimeoutMs_)) {
+        if (!gameRunnerProcess->waitForFinished(tournamentConfig.GameRunnerConfig_.KillTimeoutMs_)) {
             qDebug() << "Failed to kill game runner" << gameRunnerProcess->errorString();
         }
 
@@ -348,7 +355,7 @@ void SaveTournamentResult(const TTournamentConfig& tournamentConfig, const QVect
        return a.TotalScore_ > b.TotalScore_;
     });
 
-    QFile resultFile(tournamentConfig.TournamentResultPath_);
+    QFile resultFile(tournamentConfig.ResultSaverConfig_.ResultPath_);
     if (!resultFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
         throw std::runtime_error("failed to open result file");
     }
@@ -359,7 +366,7 @@ void SaveTournamentResult(const TTournamentConfig& tournamentConfig, const QVect
         assert(playerResult.PlayerId_ != -1);
         resultStream
             << tournamentConfig.Players_[playerResult.PlayerId_].Name_ << "\t"
-            << tournamentConfig.PlayerScoreMultiply_ * (playerResult.TotalScore_ / playerResult.GamesPlayed_) << "\t"
+            << tournamentConfig.ResultSaverConfig_.PlayerScoreMultiply_ * (playerResult.TotalScore_ / playerResult.GamesPlayed_) << "\t"
             << playerResult.AbsoluteWinnerCount_ << '\n';
     }
 }

@@ -32,16 +32,20 @@ struct TRunConfig {
         std::string Info_;
     };
 
+    struct TPlayerProcessConfig {
+        qint64 StartTimeoutMs_ = 5000;
+        qint64 FinishTimeoutMs_ = 1000;
+        qint64 TimeoutMs_ = 2000;
+        qint64 TimeoutAdditionPerTurnMs_ = 1;
+    };
+
     TGame::TConfig GameConfig_;
     std::vector<TPlayer> Players_;
 
+    TPlayerProcessConfig PlayerProcessConfig_;
+
     std::string LogDir_ = "logs";
     bool DisableVisualizerLog_ = false;
-
-    long long int ProcessPlayerStartTimeoutMs_ = 5000;
-    long long int ProcessPlayerFinishTimeoutMs_ = 1000;
-    long long int ProcessPlayerTimeoutMs_ = 2000;
-    long long int ProcessPLayerTimeoutAdditionPerTurnMs_ = 1;
 };
 
 TRunConfig LoadRunConfig(std::istream& runConfigStream) {
@@ -299,7 +303,7 @@ int main(int argc, char *argv[]) {
                 process->setProgram(QString::fromStdString(playerConfig.Info_));
                 process->start();
 
-                if (!process->waitForStarted(runConfig.ProcessPlayerStartTimeoutMs_)) {
+                if (!process->waitForStarted(runConfig.PlayerProcessConfig_.StartTimeoutMs_)) {
                     qDebug() << "Failed to start " << QString::fromStdString(playerConfig.Info_) << ":" << process->errorString();
                     return 1;
                 }
@@ -308,8 +312,8 @@ int main(int argc, char *argv[]) {
                 playerEngines.push_back(std::make_unique<TIODevicePlayer>(
                     runConfig.GameConfig_.MaxPlayerShipMovesPerStep_,
                     *process,
-                    runConfig.ProcessPlayerTimeoutMs_,
-                    runConfig.ProcessPLayerTimeoutAdditionPerTurnMs_
+                    runConfig.PlayerProcessConfig_.TimeoutMs_,
+                    runConfig.PlayerProcessConfig_.TimeoutAdditionPerTurnMs_
                 ));
                 playerProcesses.push_back(std::make_pair(std::move(process), static_cast<int>(playerEngines.size())));
                 break;
@@ -334,7 +338,7 @@ int main(int argc, char *argv[]) {
     qDebug() << "Start finishing players processes";
     for (auto& [playerProcess, playerId] : playerProcesses) {
         playerProcess->kill();
-        if (!playerProcess->waitForFinished(runConfig.ProcessPlayerFinishTimeoutMs_)) {
+        if (!playerProcess->waitForFinished(runConfig.PlayerProcessConfig_.FinishTimeoutMs_)) {
             qDebug() << "Process of player" << playerId << "did not finish";
         } else {
             qDebug() << "Process of player" << playerId << "finished";
