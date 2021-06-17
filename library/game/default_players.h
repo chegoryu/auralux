@@ -55,7 +55,7 @@ public:
     };
 
 public:
-    TAggressiveExpansionPlayer(EGameStyle gameStyle = EGameStyle::RANDOM);
+    TAggressiveExpansionPlayer(EGameStyle gameStyle = EGameStyle::RANDOM, bool sortPlanetsByShipCount = false);
 
     void SendGameInfo(const TGameInfo& gameInfo) override;
     TPlayerMove GetMove(const TGameState& gameState, const TLastShipMoves& lastShipMoves) override;
@@ -69,6 +69,7 @@ private:
     static constexpr int MIN_ARMOR_TO_REPAIR[] = {0, 75, 150, 225};
 
     EGameStyle GameStyle_;
+    bool SortPlanetsByShipCount_;
     std::vector<int> PlanetOrder_;
     int PlayerId_;
 };

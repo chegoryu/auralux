@@ -67,8 +67,9 @@ TPlayerMove TUpgradeAndRepairMainPlayer::GetMove(const TGameState& gameState, co
     return playerMove;
 }
 
-TAggressiveExpansionPlayer::TAggressiveExpansionPlayer(EGameStyle gameStyle)
+TAggressiveExpansionPlayer::TAggressiveExpansionPlayer(EGameStyle gameStyle, bool sortPlanetsByShipCount)
     : GameStyle_(gameStyle)
+    , SortPlanetsByShipCount_(sortPlanetsByShipCount)
 {}
 
 void TAggressiveExpansionPlayer::SendGameInfo(const TGameInfo& gameInfo) {
@@ -102,8 +103,18 @@ TPlayerMove TAggressiveExpansionPlayer::GetMove(const TGameState& gameState, con
 
     TPlayerMove playerMove;
     playerMove.DisqualifyMe_ = false;
+    std::vector<int> order(gameState.PlanetInfos_.size());
+    for (size_t i = 0; i < order.size(); ++i) {
+        order.push_back(i);
+    }
+    if (SortPlanetsByShipCount_) {
+        std::sort(order.begin(), order.end(), [&gameState](int a, int b) {
+            return gameState.PlanetInfos_[a].ShipCount_ > gameState.PlanetInfos_[b].ShipCount_;
+        });
+    }
+
     for (size_t i = 0; i < gameState.PlanetInfos_.size(); ++i) {
-        const auto& planetInfo = gameState.PlanetInfos_[i];
+        const auto& planetInfo = gameState.PlanetInfos_[order[i]];
         if (planetInfo.ShipCount_ == 0) {
             continue;
         }
@@ -182,9 +193,13 @@ std::unique_ptr<IPlayer> CreateDefaultPlayer(const std::string& playerType) {
     } else if (playerType == "upgrade_and_repair_main") {
         return std::make_unique<TUpgradeAndRepairMainPlayer>();
     } else if (playerType == "aggressive_expansion_random") {
-        return std::make_unique<TAggressiveExpansionPlayer>(TAggressiveExpansionPlayer::EGameStyle::RANDOM);
+        return std::make_unique<TAggressiveExpansionPlayer>(TAggressiveExpansionPlayer::EGameStyle::RANDOM, false);
+    } else if (playerType == "aggressive_expansion_random_with_sort") {
+        return std::make_unique<TAggressiveExpansionPlayer>(TAggressiveExpansionPlayer::EGameStyle::RANDOM, true);
     } else if (playerType == "aggressive_expansion_nearest") {
-        return std::make_unique<TAggressiveExpansionPlayer>(TAggressiveExpansionPlayer::EGameStyle::NEAREST);
+        return std::make_unique<TAggressiveExpansionPlayer>(TAggressiveExpansionPlayer::EGameStyle::NEAREST, false);
+    } else if (playerType == "aggressive_expansion_nearest_with_sort") {
+        return std::make_unique<TAggressiveExpansionPlayer>(TAggressiveExpansionPlayer::EGameStyle::NEAREST, true);
     } else {
         return nullptr;
     }
@@ -195,7 +210,9 @@ bool HasDefaultPlayer(const std::string& playerType) {
         "afk",
         "upgrade_and_repair_main",
         "aggressive_expansion_random",
+        "aggressive_expansion_random_with_sort",
         "aggressive_expansion_nearest",
+        "aggressive_expansion_nearest_with_sort",
     };
 
     return defaultPlayers.find(playerType) != defaultPlayers.end();
