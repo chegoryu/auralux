@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
     registerInteraction(argc, argv);
 
     TGame::TConfig config;
-    config.GameMap_ = LoadPlanarGraph([]() {
+    config.GameMap_ = LoadPlanarGraph(/* maxDistBetweenPlanets = */ 100, []() {
         return inf.readInt();
     });
     // Only 10000 moves in ejudge

@@ -23,6 +23,6 @@ struct TGameMap {
     std::optional<std::vector<TPoint>> Points_ = {};
 };
 
-TGameMap LoadPlanarGraph(std::function<int()> readInt);
+TGameMap LoadPlanarGraph(int maxDistBetweenPlanets, std::function<int()> readInt);
 
 #endif // AURALUX_GAME_MAP_H

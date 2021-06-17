@@ -14,7 +14,7 @@
 
 TGameMap ReadMapFromFile(const std::string fileName) {
     std::ifstream stream(fileName);
-    return LoadPlanarGraph([&stream]() {
+    return LoadPlanarGraph(100, [&stream]() {
         int x;
         stream >> x;
         return x;

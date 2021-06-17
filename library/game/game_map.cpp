@@ -6,8 +6,9 @@
 
 #include <cassert>
 #include <cmath>
+#include <string>
 
-TGameMap LoadPlanarGraph(std::function<int()> readInt) {
+TGameMap LoadPlanarGraph(int maxDistBetweenPlanets, std::function<int()> readInt) {
     TGameMap gameMap;
 
     int planetCount = readInt();
@@ -32,8 +33,18 @@ TGameMap LoadPlanarGraph(std::function<int()> readInt) {
             long long int dy = gameMap.Points_->at(i).y - gameMap.Points_->at(j).y;
             long long int sqDist = dx * dx + dy * dy;
             int dist = std::round(sqrtl(sqDist));
-            assert(dist > 0);
-            assert(dist <= 100);
+            if (dist <= 0 || dist > maxDistBetweenPlanets) {
+                throw std::runtime_error(
+                    "Dist between "
+                    + std::to_string(i + 1)
+                    + " and "
+                    + std::to_string(j + 1)
+                    + " is " + std::to_string(dist)
+                    + " but allowed range is "
+                    + "[" + std::to_string(1) + "; " + std::to_string(maxDistBetweenPlanets) + "]"
+                );
+            }
+
             gameMap.Dists_[i][j] = gameMap.Dists_[j][i] = dist;
         }
     }

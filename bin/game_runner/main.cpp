@@ -42,6 +42,7 @@ struct TRunConfig {
 
     TGame::TConfig GameConfig_;
     std::vector<TPlayer> Players_;
+    qint32 MaxDistBetweenPlanets_ = 100;
 
     TPlayerProcessConfig PlayerProcessConfig_;
 
@@ -71,7 +72,7 @@ TRunConfig LoadRunConfig(std::istream& runConfigStream) {
             }
 
             std::ifstream mapStream(mapPath);
-            runConfig.GameConfig_.GameMap_ = LoadPlanarGraph([&mapStream]() {
+            runConfig.GameConfig_.GameMap_ = LoadPlanarGraph(runConfig.MaxDistBetweenPlanets_, [&mapStream]() {
                 int x;
                 if (!(mapStream >> x)) {
                     throw std::runtime_error("failed to read map");
