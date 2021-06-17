@@ -123,13 +123,13 @@ TPlayerMove TAggressiveExpansionPlayer::GetMove(const TGameState& gameState, con
                 || planetInfo.Armor_ < TAggressiveExpansionPlayer::MIN_ARMOR_TO_REPAIR[planetInfo.Level_]
             ) {
                 playerMove.ShipMoves_.push_back({
-                    .FromPlanetId_ = static_cast<int>(order[i] + 1),
-                    .ToPlanetId_ = static_cast<int>(order[i] + 1),
+                    .FromPlanetId_ = order[i] + 1,
+                    .ToPlanetId_ = order[i] + 1,
                     .Count_ = planetInfo.ShipCount_,
                 });
             } else if (planetInfo.ShipCount_ > TAggressiveExpansionPlayer::MIN_SHIPS_TO_MOVE) {
                 playerMove.ShipMoves_.push_back({
-                    .FromPlanetId_ = static_cast<int>(order[i] + 1),
+                    .FromPlanetId_ = order[i] + 1,
                     .ToPlanetId_ = targetPlanet + 1,
                     .Count_ = planetInfo.ShipCount_,
                 });
