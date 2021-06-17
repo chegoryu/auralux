@@ -38,7 +38,7 @@ struct TTournamentConfig {
     };
 
     struct TResultSaverConfig {
-        QString ResultPath_ = "tournament_result.csv";
+        QString ResultFilePath_ = "tournament_result.csv";
         qint32 PlayerScoreMultiply_ = 100;
     };
 
@@ -87,6 +87,7 @@ TTournamentConfig LoadTournamentConfig(QString path) {
     bool hasGameLogsDirOption = false;
     bool hasTournamentTypeOption = false;
     bool hasTournamentStepsOption = false;
+    bool hasTournamentResultFilePathOption = false;
     while (!configStream.atEnd()) {
         QString line = configStream.readLine();
         QStringList lineParts = line.split(",", Qt::SkipEmptyParts);
@@ -152,6 +153,16 @@ TTournamentConfig LoadTournamentConfig(QString path) {
                 throw std::runtime_error("wrong TOURNAMENT_STEPS option: '" + line.toStdString() + "'");
             }
             hasTournamentStepsOption = true;
+        } else if (optionName == "TOURNAMENT_RESULT_FILE_PATH") {
+            if (hasTournamentResultFilePathOption) {
+                throw std::runtime_error("two or more TOURNAMENT_RESULT_FILE_PATH options in config");
+            }
+            if (lineParts.size() != 2) {
+                throw std::runtime_error("wrong TOURNAMENT_RESULT_FILE_PATH option: '" + line.toStdString() + "'");
+            }
+
+            tournamentConfig.ResultSaverConfig_.ResultFilePath_ = lineParts.at(1).trimmed();
+            hasTournamentResultFilePathOption = true;
         } else if (optionName == "GAME_LOGS_DIR") {
             if (hasGameLogsDirOption) {
                 throw std::runtime_error("two or more GAME_LOGS_DIR options in config");
@@ -451,9 +462,18 @@ void SaveTournamentResult(const TTournamentConfig& tournamentConfig, const QVect
        return a.TotalScore_ > b.TotalScore_;
     });
 
-    QFile resultFile(tournamentConfig.ResultSaverConfig_.ResultPath_);
+    QFileInfo resultFilePath(tournamentConfig.ResultSaverConfig_.ResultFilePath_);
+    if (!resultFilePath.makeAbsolute()) {
+        throw std::runtime_error(
+            "failed to make result file path '"
+            + tournamentConfig.ResultSaverConfig_.ResultFilePath_.toStdString()
+            + "' absolute"
+        );
+    }
+
+    QFile resultFile(resultFilePath.filePath());
     if (!resultFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        throw std::runtime_error("failed to open result file");
+        throw std::runtime_error("failed to open result file " + resultFilePath.filePath().toStdString());
     }
 
     QTextStream resultStream(&resultFile);
@@ -465,6 +485,8 @@ void SaveTournamentResult(const TTournamentConfig& tournamentConfig, const QVect
             << tournamentConfig.ResultSaverConfig_.PlayerScoreMultiply_ * (playerResult.TotalScore_ / playerResult.GamesPlayed_) << "\t"
             << playerResult.AbsoluteWinnerCount_ << '\n';
     }
+
+    qDebug() << "Tournament result file:" << resultFile.fileName();
 }
 
 int main(int argc, char *argv[]) {

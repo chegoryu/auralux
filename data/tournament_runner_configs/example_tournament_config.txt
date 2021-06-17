@@ -1,4 +1,5 @@
 TOURNAMENT_TYPE, ONE_VS_ONE_ALL
+TOURNAMENT_RESULT_FILE_PATH, tournament_result_v2.csv
 
 GAME_LOGS_DIR, logs_t
 
@@ -15,4 +16,3 @@ PLAYER, test7 upgrade_and_repair_main, DEFAULT upgrade_and_repair_main
 PLAYER, test8 upgrade_and_repair_main, DEFAULT upgrade_and_repair_main
 PLAYER, test9 upgrade_and_repair_main, DEFAULT upgrade_and_repair_main
 PLAYER, test10 afk, DEFAULT afk
-
