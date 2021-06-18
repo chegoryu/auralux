@@ -539,7 +539,7 @@ void SaveTournamentResult(const TTournamentConfig& tournamentConfig, const QVect
             << playerResult.AbsoluteWinnerCount_ << '\t'
             << playerResult.AliveInDrawCount_ << "\t"
             << playerResult.DeadCount_ << '\t'
-            << playerResult.DisqualifiedCount_ << "\n";
+            << playerResult.DisqualifiedCount_ << '\n';
 
     }
 
