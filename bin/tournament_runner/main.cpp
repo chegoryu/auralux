@@ -12,6 +12,7 @@
 #include <cassert>
 #include <memory>
 #include <random>
+#include <stdexcept>
 
 struct TTournamentConfig {
     enum EType {

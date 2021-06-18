@@ -17,10 +17,10 @@
 #include "library/game/default_players.h"
 #include "library/game/text_player.h"
 
-#include <exception>
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <stdexcept>
 
 struct TRunConfig {
     struct TPlayer {

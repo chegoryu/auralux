@@ -4,8 +4,8 @@
 
 #include "game_map.h"
 
-#include <cassert>
 #include <cmath>
+#include <stdexcept>
 #include <string>
 
 TGameMap LoadPlanarGraph(int maxDistBetweenPlanets, std::function<int()> readInt) {
