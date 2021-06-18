@@ -7,6 +7,7 @@
 #include <cassert>
 #include <cmath>
 #include <string>
+#include <stdexcept>
 
 TGameMap LoadPlanarGraph(int maxDistBetweenPlanets, std::function<int()> readInt) {
     TGameMap gameMap;
