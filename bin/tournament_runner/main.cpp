@@ -475,12 +475,6 @@ void SaveTournamentResult(const TTournamentConfig& tournamentConfig, const QVect
     }
 
     for (const auto& gameResult : gameResults) {
-        if (gameResult.WinnerId_ != -1) {
-            ++playerResults[gameResult.PlayerIds_[gameResult.WinnerId_]].AbsoluteWinnerCount_;
-        } else {
-
-        }
-
         for (int i = 0; i < gameResult.PlayerIds_.size(); ++i) {
             auto& playerResult = playerResults[gameResult.PlayerIds_[i]];
 
