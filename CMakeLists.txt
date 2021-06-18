@@ -45,6 +45,20 @@ set(GAME_MAPS
     data/maps/small_map.txt
     data/maps/big_map.txt
     data/maps/symmetrical_big_map.txt
+
+    data/maps/ffa_4_players_01.txt
+    data/maps/ffa_4_players_02.txt
+    data/maps/ffa_4_players_03.txt
+
+    data/maps/pvp_map_01.txt
+    data/maps/pvp_map_02.txt
+    data/maps/pvp_map_03.txt
+    data/maps/pvp_map_04.txt
+    data/maps/pvp_map_05.txt
+    data/maps/pvp_map_06.txt
+    data/maps/pvp_map_07.txt
+    data/maps/pvp_map_08.txt
+    data/maps/pvp_map_09.txt
 )
 foreach(GAME_MAP IN LISTS GAME_MAPS)
     configure_file(${CMAKE_SOURCE_DIR}/${GAME_MAP} ${CMAKE_CURRENT_BINARY_DIR})
