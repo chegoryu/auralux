@@ -46,9 +46,9 @@ set(GAME_MAPS
     data/maps/big_map.txt
     data/maps/symmetrical_big_map.txt
 
-    data/maps/ffa_4_players_01.txt
-    data/maps/ffa_4_players_02.txt
-    data/maps/ffa_4_players_03.txt
+    data/maps/ffa_4_players_map_01.txt
+    data/maps/ffa_4_players_map_02.txt
+    data/maps/ffa_4_players_map_03.txt
 
     data/maps/pvp_map_01.txt
     data/maps/pvp_map_02.txt
