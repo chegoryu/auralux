@@ -388,14 +388,43 @@ int main(int argc, char *argv[]) {
 
         {
             // Scores log
-            scoresLog << gameResult.WinnerId_ << '\n';
 
-            bool isFirst = true;
-            for (const auto& playerScore : gameResult.PlayerScores_) {
-                scoresLog << (isFirst ? "" : " ") << playerScore;
-                isFirst = false;
+            {
+                // Winner
+                scoresLog << gameResult.WinnerId_ << '\n';
             }
-            scoresLog << '\n';
+
+            {
+                // Scores
+                bool isFirst = true;
+                for (const auto& playerScore : gameResult.PlayerScores_) {
+                    scoresLog << (isFirst ? "" : " ") << playerScore;
+                    isFirst = false;
+                }
+                scoresLog << '\n';
+            }
+
+            {
+                // Disqualify
+                bool isFirst = true;
+                scoresLog << gameResult.DisqualifiedPlayers_.size() << '\n';
+                for (const auto& player : gameResult.DisqualifiedPlayers_) {
+                    scoresLog << (isFirst ? "" : " ") << player;
+                    isFirst = false;
+                }
+                scoresLog << '\n';
+            }
+
+            {
+                // Dead
+                bool isFirst = true;
+                scoresLog << gameResult.DeadPlayers_.size() << '\n';
+                for (const auto& player : gameResult.DeadPlayers_) {
+                    scoresLog << (isFirst ? "" : " ") << player;
+                    isFirst = false;
+                }
+                scoresLog << '\n';
+            }
         }
 
         {

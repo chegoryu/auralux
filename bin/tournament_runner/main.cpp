@@ -63,6 +63,8 @@ struct TGameRun {
 struct TGameResult {
     QVector<qint32> PlayerIds_;
     QVector<double> PlayerScores_;
+    QVector<bool> IsPlayerDisqualified_;
+    QVector<bool> IsPlayerDead_;
     qint32 WinnerId_;
     bool FromCache_;
 };
@@ -72,6 +74,9 @@ struct TPlayerResult {
     double TotalScore_;
     qint32 GamesPlayed_;
     qint32 AbsoluteWinnerCount_;
+    qint32 AliveInDrawCount_;
+    qint32 DeadCount_;
+    qint32 DisqualifiedCount_;
 };
 
 TTournamentConfig LoadTournamentConfig(QString path) {
@@ -276,7 +281,11 @@ QVector<TGameRun> GenerateGameRuns(const TTournamentConfig& tournamentConfig) {
     return {};
 }
 
-std::pair<qint32, QVector<double>> GetPlayerScores(QString playerScoresFilePath, int playerCount) {
+TGameResult GetGameResult(QString playerScoresFilePath, QVector<qint32> playerIds) {
+    TGameResult gameResult;
+    gameResult.PlayerIds_ = playerIds;
+    gameResult.FromCache_ = false;
+
     QFile playerScoresFile(playerScoresFilePath);
     if (!playerScoresFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         throw std::runtime_error("failed to open game scores file");
@@ -284,29 +293,65 @@ std::pair<qint32, QVector<double>> GetPlayerScores(QString playerScoresFilePath,
 
     QTextStream gameScoresStream(&playerScoresFile);
 
-    qint32 winnerId;
-    QVector<double> playerScores(playerCount);
-    if ((gameScoresStream >> winnerId).status() != QTextStream::Ok) {
-        throw std::runtime_error("failed to read winner id");
-    }
+    {
+        // Winner
+        if ((gameScoresStream >> gameResult.WinnerId_).status() != QTextStream::Ok) {
+            throw std::runtime_error("failed to read winner id");
+        }
 
-    if (winnerId != -1) {
-        --winnerId;
-    }
-
-    for (int i = 0; i < playerCount; ++i) {
-        if ((gameScoresStream >> playerScores[i]).status() != QTextStream::Ok) {
-            throw std::runtime_error("failed to read player score");
+        if (gameResult.WinnerId_ != -1) {
+            --gameResult.WinnerId_;
         }
     }
-    return {winnerId, playerScores};
+
+    {
+        // Scores
+        gameResult.PlayerScores_.resize(playerIds.size());
+        for (int i = 0; i < playerIds.size(); ++i) {
+            if ((gameScoresStream >> gameResult.PlayerScores_[i]).status() != QTextStream::Ok) {
+                throw std::runtime_error("failed to read player score");
+            }
+        }
+    }
+
+    {
+        // Disqualified players
+        gameResult.IsPlayerDisqualified_.resize(playerIds.size());
+        std::fill(gameResult.IsPlayerDisqualified_.begin(), gameResult.IsPlayerDisqualified_.end(), false);
+        qint32 count;
+        if ((gameScoresStream >> count).status() != QTextStream::Ok) {
+            throw std::runtime_error("failed to read disqualified player count");
+        }
+        for (int i = 0; i < count; ++i) {
+            int playerId;
+            if ((gameScoresStream >> playerId).status() != QTextStream::Ok) {
+                throw std::runtime_error("failed to read disqualified player id");
+            }
+            gameResult.IsPlayerDisqualified_[playerId - 1] = true;
+        }
+    }
+
+    {
+        // Dead players
+        gameResult.IsPlayerDead_.resize(playerIds.size());
+        std::fill(gameResult.IsPlayerDead_.begin(), gameResult.IsPlayerDead_.end(), false);
+        qint32 count;
+        if ((gameScoresStream >> count).status() != QTextStream::Ok) {
+            throw std::runtime_error("failed to read dead player count");
+        }
+        for (int i = 0; i < count; ++i) {
+            int playerId;
+            if ((gameScoresStream >> playerId).status() != QTextStream::Ok) {
+                throw std::runtime_error("failed to read deadplayer id");
+            }
+            gameResult.IsPlayerDead_[playerId - 1] = true;
+        }
+    }
+
+    return gameResult;
 }
 
 TGameResult ProcessGameRun(const TTournamentConfig& tournamentConfig, const TGameRun& gameRun, int gameRunId) {
-    TGameResult gameResult;
-    gameResult.PlayerIds_ = gameRun.PlayerIds_;
-    gameResult.FromCache_ = false;
-
     QString runDirName = QString("game_id_%2_map_%3")
         .arg(gameRunId, 5, 10, QChar('0'))
         .arg(gameRun.MapId_);
@@ -325,15 +370,9 @@ TGameResult ProcessGameRun(const TTournamentConfig& tournamentConfig, const TGam
 
     QString playerScoresFilePath = QDir(logDir).filePath(tournamentConfig.GameRunnerConfig_.PlayerScoresFileName_);
 
-    auto getPlayerScores = [&playerScoresFilePath, &gameRun, &gameResult]() {
-        auto [winnerId, playerScores] = GetPlayerScores(playerScoresFilePath, gameRun.PlayerIds_.size());
-        gameResult.WinnerId_ = winnerId;
-        gameResult.PlayerScores_ = playerScores;
-    };
-
     try {
         // Try read last run result
-        getPlayerScores();
+        TGameResult gameResult = GetGameResult(playerScoresFilePath, gameRun.PlayerIds_);
         gameResult.FromCache_ = true;
         return gameResult;
     } catch (...) {
@@ -385,8 +424,8 @@ TGameResult ProcessGameRun(const TTournamentConfig& tournamentConfig, const TGam
         throw std::runtime_error("Bad game runner exit code");
     }
 
-    getPlayerScores();
-
+    TGameResult gameResult = GetGameResult(playerScoresFilePath, gameRun.PlayerIds_);
+    gameResult.FromCache_ = false;
     return gameResult;
 }
 
@@ -429,18 +468,37 @@ void SaveTournamentResult(const TTournamentConfig& tournamentConfig, const QVect
             .TotalScore_ = 0.0,
             .GamesPlayed_ = 0,
             .AbsoluteWinnerCount_ = 0,
+            .AliveInDrawCount_ = 0,
+            .DeadCount_ = 0,
+            .DisqualifiedCount_ = 0,
         };
     }
 
     for (const auto& gameResult : gameResults) {
-        assert(gameResult.PlayerIds_.size() == gameResult.PlayerScores_.size());
         if (gameResult.WinnerId_ != -1) {
             ++playerResults[gameResult.PlayerIds_[gameResult.WinnerId_]].AbsoluteWinnerCount_;
+        } else {
+
         }
+
         for (int i = 0; i < gameResult.PlayerIds_.size(); ++i) {
             auto& playerResult = playerResults[gameResult.PlayerIds_[i]];
+
             playerResult.TotalScore_ += gameResult.PlayerScores_[i];
             ++playerResult.GamesPlayed_;
+
+            if (gameResult.WinnerId_ == i) {
+                ++playerResult.AbsoluteWinnerCount_;
+            } else {
+                if (gameResult.IsPlayerDisqualified_[i]) {
+                    ++playerResult.DisqualifiedCount_;
+                } else if (gameResult.IsPlayerDead_[i]) {
+                    ++playerResult.DeadCount_;
+                } else {
+                    assert(gameResult.WinnerId_ == -1);
+                    ++playerResult.AliveInDrawCount_;
+                }
+            }
         }
     }
 
@@ -478,13 +536,17 @@ void SaveTournamentResult(const TTournamentConfig& tournamentConfig, const QVect
     }
 
     QTextStream resultStream(&resultFile);
-    resultStream << "Name\tScore\tAbsoluteWinner\n";
+    resultStream << "Name\tScore\tAbsoluteWinner\tAliveInDraw\tDead\tDisqualified\n";
     for (const auto& playerResult : playerResults) {
         assert(playerResult.PlayerId_ != -1);
         resultStream
             << tournamentConfig.Players_[playerResult.PlayerId_].Name_ << "\t"
             << tournamentConfig.ResultSaverConfig_.PlayerScoreMultiply_ * (playerResult.TotalScore_ / playerResult.GamesPlayed_) << "\t"
-            << playerResult.AbsoluteWinnerCount_ << '\n';
+            << playerResult.AbsoluteWinnerCount_ << '\t'
+            << playerResult.AliveInDrawCount_ << "\t"
+            << playerResult.DeadCount_ << '\t'
+            << playerResult.DisqualifiedCount_ << "\n";
+
     }
 
     qDebug() << "Tournament result file:" << resultFile.fileName();
