@@ -1,5 +1,7 @@
 # Auralux
-Турнир по Auralux для ЛОШ. Визуализатор доступен в репозитории https://github.com/skorja/AuraluxVisualizer
+Основная часть для запуска игр турнира по Auralux для ЛОШ. 
+
+Визуализатор в [отдельном репозитории](https://github.com/skorja/AuraluxVisualizer).
 
 # Правила
 
