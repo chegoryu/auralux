@@ -1,5 +1,5 @@
 # Auralux
-Турнир по Auralux для ЛОШ.
+Турнир по Auralux для ЛОШ. Визуализатор доступен в репозитории https://github.com/skorja/AuraluxVisualizer
 
 # Правила
 
